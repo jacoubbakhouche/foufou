@@ -118,10 +118,10 @@ const ProductDetail = () => {
                             <Badge variant="outline" className="mb-2 text-primary border-primary/20 bg-primary/5 uppercase tracking-wider">{product.category}</Badge>
                             <h1 className="text-3xl md:text-4xl font-black mb-3 text-foreground leading-tight">{product.name}</h1>
                             <div className="flex items-center gap-3">
-                                <span className="text-3xl font-bold text-primary">{product.price} ر.س</span>
+                                <span className="text-3xl font-bold text-primary">{product.price} د.ج</span>
                                 {product.originalPrice && (
                                     <span className="text-xl text-muted-foreground line-through opacity-60">
-                                        {product.originalPrice} ر.س
+                                        {product.originalPrice} د.ج
                                     </span>
                                 )}
                             </div>

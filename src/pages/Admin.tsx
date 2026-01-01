@@ -430,7 +430,7 @@ const Admin = () => {
                           </div>
                         </div>
                         <div className="text-left">
-                          <p className="text-lg font-bold text-primary">{order.total} ر.س</p>
+                          <p className="text-lg font-bold text-primary">{order.total} د.ج</p>
                           <p className="text-xs text-muted-foreground">
                             {new Date(order.created_at).toLocaleDateString('ar-SA')}
                           </p>

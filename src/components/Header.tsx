@@ -43,15 +43,29 @@ const Header = () => {
           <div className="flex items-center gap-4">
             <ThemeToggle />
 
-            {user && isAdmin && (
+            {user ? (
+              isAdmin && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => navigate('/admin')}
+                  className="text-muted-foreground hover:text-primary transition-colors"
+                  title="لوحة التحكم"
+                >
+                  <Settings className="h-5 w-5" />
+                </Button>
+              )
+            ) : (
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => navigate('/admin')}
-                className="text-muted-foreground hover:text-primary"
-                title="لوحة التحكم"
+                onClick={() => navigate('/auth')}
+                className="text-muted-foreground hover:text-primary transition-colors"
+                title="تسجيل الدخول"
               >
-                <Settings className="h-5 w-5" />
+                <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center">
+                  <Settings className="h-4 w-4" />
+                </div>
               </Button>
             )}
           </div>

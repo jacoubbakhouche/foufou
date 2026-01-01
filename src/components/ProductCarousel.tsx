@@ -34,7 +34,7 @@ const ProductCarousel = ({ products }: ProductCarouselProps) => {
                             key={product.id}
                             className="flex-[0_0_180px] sm:flex-[0_0_210px] md:flex-[0_0_240px] min-w-0"
                         >
-                            <ProductCard product={product} />
+                            <ProductCard product={product} compact={true} />
                         </div>
                     ))}
                 </div>

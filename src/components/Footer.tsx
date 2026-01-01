@@ -27,7 +27,7 @@ const Footer = () => {
                 <a href="#" className="hover:text-gold transition-colors">سياسة الإرجاع</a>
               </li>
               <li>
-                <a href="#" className="hover:text-gold transition-colors">الشروط والأحكام</a>
+                <a href="/auth" className="hover:text-gold transition-colors">تسجيل دخول المسؤول</a>
               </li>
             </ul>
           </div>

@@ -6,9 +6,10 @@ import { cn } from '@/lib/utils';
 
 interface ProductCardProps {
   product: Product;
+  compact?: boolean;
 }
 
-const ProductCard = ({ product }: ProductCardProps) => {
+const ProductCard = ({ product, compact = false }: ProductCardProps) => {
   const navigate = useNavigate();
   const [selectedColor, setSelectedColor] = useState(product.colors[0]);
   const [selectedSize, setSelectedSize] = useState(product.sizes[0]);
@@ -35,7 +36,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
   };
 
   return (
-    <div className="group bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-card transition-all duration-300 animate-fade-up">
+    <div className={cn(
+      "group bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-card transition-all duration-300 animate-fade-up",
+      compact ? "border border-border/50" : ""
+    )}>
       <Link to={`/product/${product.id}`} className="block relative aspect-[4/5] overflow-hidden bg-cream-dark">
         {images.map((img, index) => (
           <img
@@ -49,25 +53,40 @@ const ProductCard = ({ product }: ProductCardProps) => {
           />
         ))}
         {discountPercentage > 0 && (
-          <span className="absolute top-3 right-3 bg-destructive text-destructive-foreground text-xs font-bold px-2 py-1 rounded-full z-10">
+          <span className={cn(
+            "absolute top-3 right-3 bg-destructive text-destructive-foreground font-bold rounded-full z-10 text-center",
+            compact ? "text-[10px] px-1.5 py-0.5" : "text-xs px-2 py-1"
+          )}>
             خصم {discountPercentage}%
           </span>
         )}
       </Link>
 
       {/* Content */}
-      <div className="p-3 space-y-2">
+      <div className={cn(
+        "space-y-2",
+        compact ? "p-3" : "p-4"
+      )}>
         <Link to={`/product/${product.id}`}>
-          <h3 className="font-semibold text-sm text-foreground line-clamp-1 hover:text-primary transition-colors cursor-pointer">
+          <h3 className={cn(
+            "font-semibold text-foreground line-clamp-1 hover:text-primary transition-colors cursor-pointer",
+            compact ? "text-sm" : "text-lg"
+          )}>
             {product.name}
           </h3>
         </Link>
 
         {/* Price */}
         <div className="flex items-center gap-2">
-          <span className="text-base font-bold text-gradient-gold">{product.price} د.ج</span>
+          <span className={cn(
+            "font-bold text-gradient-gold",
+            compact ? "text-base" : "text-xl"
+          )}>{product.price} د.ج</span>
           {product.originalPrice && (
-            <span className="text-[10px] text-muted-foreground line-through">
+            <span className={cn(
+              "text-muted-foreground line-through opacity-60",
+              compact ? "text-[10px]" : "text-sm"
+            )}>
               {product.originalPrice} د.ج
             </span>
           )}
@@ -77,7 +96,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         <div className="flex items-center gap-1.5">
           <span className="text-[10px] text-muted-foreground">اللون:</span>
           <div className="flex gap-1">
-            {product.colors.filter((_, i) => i < 4).map((color) => (
+            {product.colors.filter((_, i) => !compact || i < 4).map((color) => (
               <button
                 key={color}
                 onClick={(e) => {
@@ -85,14 +104,15 @@ const ProductCard = ({ product }: ProductCardProps) => {
                   setSelectedColor(color);
                 }}
                 className={cn(
-                  'w-4 h-4 rounded-full transition-all border border-border',
+                  'rounded-full transition-all border border-border',
+                  compact ? 'w-4 h-4' : 'w-6 h-6',
                   selectedColor === color && 'ring-1 ring-primary ring-offset-1 scale-110'
                 )}
                 style={{ backgroundColor: isHexColor(color) ? color : undefined }}
                 title={color}
               />
             ))}
-            {product.colors.length > 4 && (
+            {compact && product.colors.length > 4 && (
               <span className="text-[10px] text-muted-foreground">+{product.colors.length - 4}</span>
             )}
           </div>
@@ -102,7 +122,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="text-[10px] text-muted-foreground">المقاس:</span>
           <div className="flex gap-1">
-            {product.sizes.filter((_, i) => i < 3).map((size) => (
+            {product.sizes.filter((_, i) => !compact || i < 3).map((size) => (
               <button
                 key={size}
                 onClick={(e) => {
@@ -110,7 +130,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
                   setSelectedSize(size);
                 }}
                 className={cn(
-                  'px-1.5 py-0.5 text-[10px] rounded-md transition-all border',
+                  'rounded-md transition-all border font-medium',
+                  compact ? 'px-1.5 py-0.5 text-[10px]' : 'px-3 py-1 text-xs',
                   selectedSize === size
                     ? 'bg-primary text-primary-foreground border-primary'
                     : 'bg-secondary text-secondary-foreground border-border hover:border-primary/50'
@@ -119,7 +140,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
                 {size}
               </button>
             ))}
-            {product.sizes.length > 3 && (
+            {compact && product.sizes.length > 3 && (
               <span className="text-[10px] text-muted-foreground">..</span>
             )}
           </div>
@@ -128,7 +149,10 @@ const ProductCard = ({ product }: ProductCardProps) => {
         {/* Product Detail Button */}
         <Button
           variant="gold"
-          className="w-full rounded-lg h-9 text-xs font-bold shadow-gold group-hover:scale-[1.02] transition-transform"
+          className={cn(
+            "w-full rounded-xl font-bold shadow-gold group-hover:scale-[1.02] transition-transform",
+            compact ? "h-9 text-xs" : "h-11 text-base"
+          )}
           onClick={() => navigate(`/product/${product.id}`)}
         >
           شراء الآن
