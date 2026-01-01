@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useProducts, useCategories } from '@/hooks/useProducts';
-import ProductCard from '@/components/ProductCard';
+import ProductCarousel from '@/components/ProductCarousel';
 import { cn } from '@/lib/utils';
 
 const ProductGrid = () => {
@@ -13,6 +13,15 @@ const ProductGrid = () => {
       ? products
       : products.filter((p) => p.category === selectedCategory);
 
+  // Chunk products into groups of 20
+  const chunkProducts = (arr: any[], size: number) => {
+    return Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
+      arr.slice(i * size, i * size + size)
+    );
+  };
+
+  const productGroups = chunkProducts(filteredProducts, 20);
+
   if (loading) {
     return (
       <section className="py-16 md:py-24 bg-background">
@@ -24,15 +33,15 @@ const ProductGrid = () => {
   }
 
   return (
-    <section id="products" className="py-16 md:py-24 bg-background">
+    <section id="products" className="py-16 md:py-24 bg-background overflow-hidden">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            <span className="text-gradient-gold">منتجاتنا</span> المميزة
+            <span className="text-gradient-gold">أحدث</span> المنتجات
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            اختر من بين تشكيلة واسعة من الملابس العصرية بأفضل الأسعار
+            استعرض تشكيلتنا المميزة من المنتجات المخصصة بجودة عالية
           </p>
         </div>
 
@@ -54,11 +63,20 @@ const ProductGrid = () => {
           ))}
         </div>
 
-        {/* Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredProducts.map((product, index) => (
-            <div key={product.id} style={{ animationDelay: `${index * 0.1}s` }}>
-              <ProductCard product={product} />
+        {/* Product Carousels */}
+        <div className="space-y-16">
+          {productGroups.map((group, index) => (
+            <div key={index} className="relative">
+              {productGroups.length > 1 && (
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="h-px bg-border flex-1" />
+                  <span className="text-sm font-bold text-muted-foreground whitespace-nowrap px-4 py-1 bg-secondary rounded-full">
+                    المجموعة {index + 1}
+                  </span>
+                  <div className="h-px bg-border flex-1" />
+                </div>
+              )}
+              <ProductCarousel products={group} />
             </div>
           ))}
         </div>

@@ -56,52 +56,61 @@ const ProductCard = ({ product }: ProductCardProps) => {
       </Link>
 
       {/* Content */}
-      <div className="p-4 space-y-3">
+      <div className="p-3 space-y-2">
         <Link to={`/product/${product.id}`}>
-          <h3 className="font-semibold text-lg text-foreground line-clamp-1 hover:text-primary transition-colors cursor-pointer">
+          <h3 className="font-semibold text-sm text-foreground line-clamp-1 hover:text-primary transition-colors cursor-pointer">
             {product.name}
           </h3>
         </Link>
 
         {/* Price */}
         <div className="flex items-center gap-2">
-          <span className="text-xl font-bold text-primary">{product.price} ر.س</span>
+          <span className="text-base font-bold text-gradient-gold">{product.price} د.ج</span>
           {product.originalPrice && (
-            <span className="text-sm text-muted-foreground line-through">
-              {product.originalPrice} ر.س
+            <span className="text-[10px] text-muted-foreground line-through">
+              {product.originalPrice} د.ج
             </span>
           )}
         </div>
 
         {/* Colors */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">اللون:</span>
-          <div className="flex gap-2">
-            {product.colors.map((color) => (
+        <div className="flex items-center gap-1.5">
+          <span className="text-[10px] text-muted-foreground">اللون:</span>
+          <div className="flex gap-1">
+            {product.colors.filter((_, i) => i < 4).map((color) => (
               <button
                 key={color}
-                onClick={() => setSelectedColor(color)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setSelectedColor(color);
+                }}
                 className={cn(
-                  'w-6 h-6 rounded-full transition-all border border-border',
-                  selectedColor === color && 'ring-2 ring-primary ring-offset-2 scale-110'
+                  'w-4 h-4 rounded-full transition-all border border-border',
+                  selectedColor === color && 'ring-1 ring-primary ring-offset-1 scale-110'
                 )}
                 style={{ backgroundColor: isHexColor(color) ? color : undefined }}
                 title={color}
               />
             ))}
+            {product.colors.length > 4 && (
+              <span className="text-[10px] text-muted-foreground">+{product.colors.length - 4}</span>
+            )}
           </div>
         </div>
 
         {/* Sizes */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-xs text-muted-foreground">المقاس:</span>
-          <div className="flex gap-2">
-            {product.sizes.map((size) => (
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className="text-[10px] text-muted-foreground">المقاس:</span>
+          <div className="flex gap-1">
+            {product.sizes.filter((_, i) => i < 3).map((size) => (
               <button
                 key={size}
-                onClick={() => setSelectedSize(size)}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setSelectedSize(size);
+                }}
                 className={cn(
-                  'px-3 py-1 text-xs rounded-lg transition-all border',
+                  'px-1.5 py-0.5 text-[10px] rounded-md transition-all border',
                   selectedSize === size
                     ? 'bg-primary text-primary-foreground border-primary'
                     : 'bg-secondary text-secondary-foreground border-border hover:border-primary/50'
@@ -110,13 +119,16 @@ const ProductCard = ({ product }: ProductCardProps) => {
                 {size}
               </button>
             ))}
+            {product.sizes.length > 3 && (
+              <span className="text-[10px] text-muted-foreground">..</span>
+            )}
           </div>
         </div>
 
         {/* Product Detail Button */}
         <Button
           variant="gold"
-          className="w-full rounded-xl h-11 text-base font-bold shadow-gold group-hover:scale-[1.02] transition-transform"
+          className="w-full rounded-lg h-9 text-xs font-bold shadow-gold group-hover:scale-[1.02] transition-transform"
           onClick={() => navigate(`/product/${product.id}`)}
         >
           شراء الآن
