@@ -20,7 +20,7 @@ const ProductGrid = () => {
     );
   };
 
-  const productGroups = chunkProducts(filteredProducts, 20);
+  const productGroups = chunkProducts(filteredProducts, 6);
 
   if (loading) {
     return (
@@ -34,9 +34,9 @@ const ProductGrid = () => {
 
   return (
     <section id="products" className="py-16 md:py-24 bg-background overflow-hidden">
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto">
         {/* Section Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-12 px-4">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
             <span className="text-gradient-gold">أحدث</span> المنتجات
           </h2>
@@ -46,7 +46,7 @@ const ProductGrid = () => {
         </div>
 
         {/* Categories Filter */}
-        <div id="categories" className="flex flex-wrap justify-center gap-2 mb-10">
+        <div id="categories" className="flex flex-wrap justify-center gap-2 mb-10 px-4">
           {categories.map((category) => (
             <button
               key={category}
@@ -68,7 +68,7 @@ const ProductGrid = () => {
           {productGroups.map((group, index) => (
             <div key={index} className="relative">
               {productGroups.length > 1 && (
-                <div className="flex items-center gap-4 mb-6">
+                <div className="flex items-center gap-4 mb-6 px-4">
                   <div className="h-px bg-border flex-1" />
                   <span className="text-sm font-bold text-muted-foreground whitespace-nowrap px-4 py-1 bg-secondary rounded-full">
                     المجموعة {index + 1}

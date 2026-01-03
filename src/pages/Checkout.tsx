@@ -219,7 +219,7 @@ const Checkout = () => {
                       {item.selectedColor} • {item.selectedSize} • الكمية: {item.quantity}
                     </p>
                     <p className="text-primary font-semibold mt-1">
-                      {item.product.price * item.quantity} ر.س
+                      {item.product.price * item.quantity} د.ج
                     </p>
                   </div>
                 </div>
@@ -229,7 +229,7 @@ const Checkout = () => {
             <div className="border-t border-border pt-4 space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">المجموع الفرعي</span>
-                <span>{total} ر.س</span>
+                <span>{total} د.ج</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">التوصيل</span>
@@ -237,7 +237,7 @@ const Checkout = () => {
               </div>
               <div className="flex justify-between text-lg font-bold pt-2 border-t border-border">
                 <span>الإجمالي</span>
-                <span className="text-primary">{total} ر.س</span>
+                <span className="text-primary">{total} د.ج</span>
               </div>
             </div>
           </div>

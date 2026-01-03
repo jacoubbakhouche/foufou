@@ -1,7 +1,25 @@
+import { useState, useEffect } from 'react';
 import { ArrowDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
+
+const HERO_IMAGES = [
+  "/slider/1.jpg",
+  "/slider/2.jpg",
+  "/slider/3.jpg"
+];
 
 const Hero = () => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % HERO_IMAGES.length);
+    }, 4000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <section className="relative min-h-[85vh] flex items-center justify-center bg-gradient-hero overflow-hidden">
       {/* Decorative Elements */}
@@ -14,30 +32,30 @@ const Hero = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="text-center lg:text-right">
             <span className="inline-block px-4 py-2 bg-gold/10 text-gold-dark dark:text-gold-light rounded-full text-sm font-semibold mb-6 animate-fade-up">
-              🎉 خصم 30% على جميع المنتجات
+              🎉 خصم 30% على جميع المنتجات لفترة محدودة
             </span>
 
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 animate-fade-up" style={{ animationDelay: '0.1s' }}>
-              <span className="text-foreground">تميز بمنتجاتك</span>
+              <span className="text-foreground">اكتشفي</span>
               <br />
-              <span className="text-gradient-gold">المخصصة هنا</span>
+              <span className="text-gradient-gold">أناقتك الحقيقية</span>
             </h1>
 
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0 animate-fade-up" style={{ animationDelay: '0.2s' }}>
-              نقدم خدمات الطباعة المتكاملة على الأقمشة، الأغلفة، والعديد من المنتجات الأخرى لتناسب ذوقك الخاص.
+              مجموعة مميزة من أرقى الأزياء النسائية العصرية. تصاميم فريدة بجودة عالية تناسب ذوقك الرفيع وتبرز جمالك.
               <br />
-              <strong className="text-foreground">الدفع عند الاستلام</strong> - جودة تليق بك
+              <strong className="text-foreground">الدفع عند الاستلام</strong> - توصيل لجميع الولايات
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start animate-fade-up" style={{ animationDelay: '0.3s' }}>
               <Button variant="hero" size="xl" asChild>
                 <a href="#products">
-                  تسوق الآن
+                  تسوقي الآن
                 </a>
               </Button>
               <Button variant="outline" size="xl" asChild className="bg-background/50 backdrop-blur-sm">
                 <a href="#categories">
-                  تصفح التصنيفات
+                  تصفح المجموعات
                 </a>
               </Button>
             </div>
@@ -49,31 +67,46 @@ const Hero = () => {
                 <span className="text-sm">توصيل سريع</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-2xl">💳</span>
-                <span className="text-sm">الدفع عند الاستلام</span>
+                <span className="text-2xl">👗</span>
+                <span className="text-sm">أحدث الموديلات</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-2xl">🔄</span>
-                <span className="text-sm">إرجاع مجاني</span>
+                <span className="text-2xl">💎</span>
+                <span className="text-sm">جودة عالية</span>
               </div>
             </div>
           </div>
 
-          {/* Welcome Image */}
-          <div className="relative hidden lg:block animate-fade-up" style={{ animationDelay: '0.5s' }}>
-            <div className="absolute inset-0 bg-gold/20 rounded-3xl rotate-3 scale-105 blur-sm -z-10" />
-            <div className="aspect-square rounded-full overflow-hidden shadow-2xl border-8 border-gold/20 dark:border-gold/10 p-4 bg-background animate-scale-in">
-              <img
-                src="/logo_master_print.png"
-                alt="Master Print Logo"
-                className="w-full h-full object-contain transition-transform duration-700 hover:rotate-6 hover:scale-105"
-              />
+          {/* Welcome Image Carousel */}
+          <div className="relative block h-[400px] lg:h-[600px] animate-fade-up order-first lg:order-last mb-8 lg:mb-0" style={{ animationDelay: '0.5s' }}>
+            <div className="absolute inset-0 bg-gold/20 rounded-[3rem] rotate-3 scale-105 blur-sm -z-10" />
+
+            <div className="relative w-full h-full rounded-[3rem] overflow-hidden shadow-2xl border-4 border-white/20">
+              {HERO_IMAGES.map((img, index) => (
+                <div
+                  key={index}
+                  className={cn(
+                    "absolute inset-0 transition-opacity duration-1000 ease-in-out",
+                    index === currentImageIndex ? "opacity-100" : "opacity-0"
+                  )}
+                >
+                  <img
+                    src={img}
+                    alt={`Fashion style ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                  {/* Gradient overlay for better text contrast if needed in future */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                </div>
+              ))}
             </div>
-            <div className="absolute -bottom-6 -right-6 bg-white dark:bg-card p-4 rounded-2xl shadow-xl flex items-center gap-3 border">
+
+            {/* Floating Badge */}
+            <div className="absolute bottom-10 -left-6 bg-white dark:bg-card p-4 rounded-2xl shadow-xl flex items-center gap-3 border animate-bounce" style={{ animationDuration: '3s' }}>
               <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-2xl">✨</div>
               <div>
-                <p className="text-xs text-muted-foreground">ثقة العملاء</p>
-                <p className="text-sm font-bold">10,000+ عميل راضٍ</p>
+                <p className="text-xs text-muted-foreground">خيارات متنوعة</p>
+                <p className="text-sm font-bold">لإطلالة عصرية</p>
               </div>
             </div>
           </div>

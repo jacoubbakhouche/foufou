@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Product } from '@/types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { ShoppingBag, Eye } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
@@ -37,8 +38,8 @@ const ProductCard = ({ product, compact = false }: ProductCardProps) => {
 
   return (
     <div className={cn(
-      "group bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-card transition-all duration-300 animate-fade-up",
-      compact ? "border border-border/50" : ""
+      "group bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-card transition-all duration-500 animate-fade-up border border-transparent hover:border-gold/20",
+      compact ? "w-full" : ""
     )}>
       <Link to={`/product/${product.id}`} className="block relative aspect-[4/5] overflow-hidden bg-cream-dark">
         {images.map((img, index) => (
@@ -47,17 +48,36 @@ const ProductCard = ({ product, compact = false }: ProductCardProps) => {
             src={img}
             alt={product.name}
             className={cn(
-              "absolute inset-0 w-full h-full object-cover transition-opacity duration-1000",
-              currentImageIndex === index ? "opacity-100 scale-105" : "opacity-0"
+              "absolute inset-0 w-full h-full object-cover transition-all duration-1000",
+              currentImageIndex === index ? "opacity-100 scale-100 group-hover:scale-110" : "opacity-0"
             )}
           />
         ))}
+
+        {product.video_url && (
+          <video
+            src={product.video_url}
+            loop
+            muted
+            playsInline
+            autoPlay
+            className="absolute inset-0 w-full h-full object-cover z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+          />
+        )}
+
+        {/* Hover Actions Overlay */}
+        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+          <div className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-primary shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+            <Eye className="h-5 w-5" />
+          </div>
+        </div>
+
         {discountPercentage > 0 && (
           <span className={cn(
-            "absolute top-3 right-3 bg-destructive text-destructive-foreground font-bold rounded-full z-10 text-center",
+            "absolute top-3 right-3 bg-destructive text-white font-bold rounded-full z-10 text-center shadow-lg",
             compact ? "text-[10px] px-1.5 py-0.5" : "text-xs px-2 py-1"
           )}>
-            خصم {discountPercentage}%
+            -{discountPercentage}%
           </span>
         )}
       </Link>
@@ -69,8 +89,8 @@ const ProductCard = ({ product, compact = false }: ProductCardProps) => {
       )}>
         <Link to={`/product/${product.id}`}>
           <h3 className={cn(
-            "font-semibold text-foreground line-clamp-1 hover:text-primary transition-colors cursor-pointer",
-            compact ? "text-sm" : "text-lg"
+            "font-bold text-foreground line-clamp-1 hover:text-primary transition-colors cursor-pointer",
+            compact ? "text-sm" : "text-base"
           )}>
             {product.name}
           </h3>
@@ -79,24 +99,24 @@ const ProductCard = ({ product, compact = false }: ProductCardProps) => {
         {/* Price */}
         <div className="flex items-center gap-2">
           <span className={cn(
-            "font-bold text-gradient-gold",
-            compact ? "text-base" : "text-xl"
+            "font-black text-primary",
+            compact ? "text-base" : "text-lg"
           )}>{product.price} د.ج</span>
           {product.originalPrice && (
             <span className={cn(
-              "text-muted-foreground line-through opacity-60",
-              compact ? "text-[10px]" : "text-sm"
+              "text-muted-foreground line-through opacity-50",
+              compact ? "text-[10px]" : "text-xs"
             )}>
               {product.originalPrice} د.ج
             </span>
           )}
         </div>
 
-        {/* Colors */}
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] text-muted-foreground">اللون:</span>
+        {/* Colors & Sizes Row */}
+        <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/40">
+          {/* Colors */}
           <div className="flex gap-1">
-            {product.colors.filter((_, i) => !compact || i < 4).map((color) => (
+            {product.colors.filter((_, i) => !compact || i < 3).map((color) => (
               <button
                 key={color}
                 onClick={(e) => {
@@ -104,58 +124,31 @@ const ProductCard = ({ product, compact = false }: ProductCardProps) => {
                   setSelectedColor(color);
                 }}
                 className={cn(
-                  'rounded-full transition-all border border-border',
-                  compact ? 'w-4 h-4' : 'w-6 h-6',
+                  'rounded-full transition-all border border-white shadow-sm',
+                  compact ? 'w-3.5 h-3.5' : 'w-4.5 h-4.5',
                   selectedColor === color && 'ring-1 ring-primary ring-offset-1 scale-110'
                 )}
                 style={{ backgroundColor: isHexColor(color) ? color : undefined }}
-                title={color}
               />
             ))}
-            {compact && product.colors.length > 4 && (
-              <span className="text-[10px] text-muted-foreground">+{product.colors.length - 4}</span>
-            )}
           </div>
-        </div>
 
-        {/* Sizes */}
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="text-[10px] text-muted-foreground">المقاس:</span>
-          <div className="flex gap-1">
-            {product.sizes.filter((_, i) => !compact || i < 3).map((size) => (
-              <button
-                key={size}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setSelectedSize(size);
-                }}
-                className={cn(
-                  'rounded-md transition-all border font-medium',
-                  compact ? 'px-1.5 py-0.5 text-[10px]' : 'px-3 py-1 text-xs',
-                  selectedSize === size
-                    ? 'bg-primary text-primary-foreground border-primary'
-                    : 'bg-secondary text-secondary-foreground border-border hover:border-primary/50'
-                )}
-              >
-                {size}
-              </button>
-            ))}
-            {compact && product.sizes.length > 3 && (
-              <span className="text-[10px] text-muted-foreground">..</span>
-            )}
-          </div>
+          <span className="text-[10px] font-bold text-muted-foreground bg-secondary/50 px-1.5 py-0.5 rounded uppercase">
+            {selectedSize}
+          </span>
         </div>
 
         {/* Product Detail Button */}
         <Button
           variant="gold"
           className={cn(
-            "w-full rounded-xl font-bold shadow-gold group-hover:scale-[1.02] transition-transform",
-            compact ? "h-9 text-xs" : "h-11 text-base"
+            "w-full rounded-xl font-bold shadow-gold group-hover:shadow-gold-lg transition-all flex items-center justify-center gap-2 text-white",
+            compact ? "h-9 text-xs" : "h-10 text-sm"
           )}
           onClick={() => navigate(`/product/${product.id}`)}
         >
-          شراء الآن
+          <ShoppingBag className={compact ? "h-3.5 w-3.5" : "h-4 w-4"} />
+          <span>شراء الآن</span>
         </Button>
       </div>
     </div>

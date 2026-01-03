@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
+import Autoplay from 'embla-carousel-autoplay';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Product } from '@/types';
 import ProductCard from './ProductCard';
@@ -15,7 +16,8 @@ const ProductCarousel = ({ products }: ProductCarouselProps) => {
         direction: 'rtl',
         slidesToScroll: 1,
         containScroll: 'trimSnaps',
-    });
+        loop: true,
+    }, [Autoplay({ delay: 3000, stopOnInteraction: false, playOnInit: true })]);
 
     const scrollPrev = useCallback(() => {
         if (emblaApi) emblaApi.scrollPrev();
@@ -26,7 +28,7 @@ const ProductCarousel = ({ products }: ProductCarouselProps) => {
     }, [emblaApi]);
 
     return (
-        <div className="relative group/carousel px-4">
+        <div className="relative group/carousel">
             <div className="overflow-hidden" ref={emblaRef}>
                 <div className="flex gap-4 py-4">
                     {products.map((product) => (

@@ -6,53 +6,56 @@
 
 @layer base {
   :root {
-    --background: 40 33% 98%;
-    --foreground: 30 10% 15%;
+    --background: 340 33% 98%;
+    --foreground: 335 20% 15%;
 
-    --card: 40 30% 96%;
-    --card-foreground: 30 10% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 335 20% 15%;
 
-    --popover: 40 33% 98%;
-    --popover-foreground: 30 10% 15%;
+    --popover: 340 33% 99%;
+    --popover-foreground: 335 20% 15%;
 
-    --primary: 38 70% 50%;
-    --primary-foreground: 40 33% 98%;
+    --primary: 335 75% 65%;
+    /* Soft Pink */
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 30 20% 90%;
-    --secondary-foreground: 30 10% 25%;
+    --secondary: 335 30% 94%;
+    --secondary-foreground: 335 20% 25%;
 
-    --muted: 30 15% 92%;
-    --muted-foreground: 30 10% 45%;
+    --muted: 335 15% 94%;
+    --muted-foreground: 335 10% 50%;
 
-    --accent: 38 60% 55%;
-    --accent-foreground: 40 33% 98%;
+    --accent: 335 60% 85%;
+    --accent-foreground: 335 20% 20%;
 
-    --destructive: 0 84% 60%;
+    --destructive: 0 84% 65%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 30 20% 88%;
-    --input: 30 20% 88%;
-    --ring: 38 70% 50%;
+    --border: 335 20% 90%;
+    --input: 335 20% 90%;
+    --ring: 335 75% 65%;
 
     --radius: 0.75rem;
 
     /* Custom tokens */
-    --gold: 38 70% 50%;
-    --gold-light: 40 60% 70%;
-    --gold-dark: 35 75% 40%;
-    --cream: 40 33% 98%;
-    --cream-dark: 40 25% 92%;
-    --charcoal: 30 10% 15%;
-    --warm-gray: 30 10% 45%;
+    --gold: 335 75% 65%;
+    /* Replaced Gold with Pink Main */
+    --gold-light: 335 70% 75%;
+    --gold-dark: 335 80% 45%;
+
+    --cream: 340 33% 98%;
+    --cream-dark: 340 25% 94%;
+    --charcoal: 335 20% 15%;
+    --warm-gray: 335 10% 45%;
 
     /* Gradients */
-    --gradient-gold: linear-gradient(135deg, hsl(38 70% 50%) 0%, hsl(35 75% 40%) 100%);
-    --gradient-hero: linear-gradient(180deg, hsl(40 33% 98%) 0%, hsl(40 25% 92%) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(335 75% 65%) 0%, hsl(335 80% 45%) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(340 40% 97%) 0%, hsl(340 30% 94%) 100%);
 
     /* Shadows */
-    --shadow-soft: 0 4px 20px -4px hsl(30 20% 15% / 0.08);
-    --shadow-card: 0 8px 30px -8px hsl(30 20% 15% / 0.12);
-    --shadow-gold: 0 4px 20px -4px hsl(38 70% 50% / 0.3);
+    --shadow-soft: 0 4px 20px -4px hsl(335 20% 15% / 0.05);
+    --shadow-card: 0 8px 30px -8px hsl(335 20% 15% / 0.08);
+    --shadow-gold: 0 4px 20px -4px hsl(335 75% 65% / 0.25);
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -65,44 +68,44 @@
   }
 
   .dark {
-    --background: 30 15% 10%;
-    --foreground: 40 25% 95%;
+    --background: 335 25% 10%;
+    --foreground: 335 15% 95%;
 
-    --card: 30 15% 12%;
-    --card-foreground: 40 25% 95%;
+    --card: 335 25% 12%;
+    --card-foreground: 335 15% 95%;
 
-    --popover: 30 15% 10%;
-    --popover-foreground: 40 25% 95%;
+    --popover: 335 25% 10%;
+    --popover-foreground: 335 15% 95%;
 
-    --primary: 38 70% 55%;
-    --primary-foreground: 30 15% 10%;
+    --primary: 335 75% 65%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 30 15% 18%;
-    --secondary-foreground: 40 25% 90%;
+    --secondary: 335 25% 18%;
+    --secondary-foreground: 335 15% 90%;
 
-    --muted: 30 15% 20%;
-    --muted-foreground: 30 15% 60%;
+    --muted: 335 25% 20%;
+    --muted-foreground: 335 15% 70%;
 
-    --accent: 38 65% 50%;
-    --accent-foreground: 30 15% 10%;
+    --accent: 335 65% 50%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 70% 45%;
+    --destructive: 0 62% 30%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 30 15% 20%;
-    --input: 30 15% 20%;
-    --ring: 38 70% 55%;
+    --border: 335 25% 20%;
+    --input: 335 25% 20%;
+    --ring: 335 75% 65%;
 
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-background: 335 25% 10%;
+    --sidebar-foreground: 335 15% 95%;
+    --sidebar-primary: 335 75% 65%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 335 25% 18%;
+    --sidebar-accent-foreground: 335 15% 90%;
+    --sidebar-border: 335 25% 20%;
+    --sidebar-ring: 335 75% 65%;
 
-    --gradient-hero: linear-gradient(180deg, hsl(30 15% 10%) 0%, hsl(30 15% 12%) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(335 25% 10%) 0%, hsl(335 25% 12%) 100%);
   }
 }
 
@@ -165,8 +168,15 @@
   }
 
   @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
   }
 
   @keyframes fadeUp {
@@ -174,6 +184,7 @@
       opacity: 0;
       transform: translateY(20px);
     }
+
     to {
       opacity: 1;
       transform: translateY(0);
@@ -185,6 +196,7 @@
       opacity: 0;
       transform: scale(0.9);
     }
+
     to {
       opacity: 1;
       transform: scale(1);

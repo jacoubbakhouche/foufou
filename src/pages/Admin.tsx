@@ -738,10 +738,10 @@ const Admin = () => {
                         <TableCell className="font-medium">{product.name}</TableCell>
                         <TableCell>{product.category}</TableCell>
                         <TableCell>
-                          <span className="font-bold text-primary">{product.price} ر.س</span>
+                          <span className="font-bold text-primary">{product.price} د.ج</span>
                           {product.original_price && (
                             <span className="text-xs text-muted-foreground line-through mr-2">
-                              {product.original_price} ر.س
+                              {product.original_price} د.ج
                             </span>
                           )}
                         </TableCell>
@@ -750,7 +750,7 @@ const Admin = () => {
                             <span className={cn(
                               "font-bold",
                               product.stock_quantity === 0 && "text-destructive",
-                              product.stock_quantity > 0 && product.stock_quantity < 10 && "text-orange-500",
+                              product.stock_quantity > 0 && product.stock_quantity < 10 && "text-destructive",
                               product.stock_quantity >= 10 && "text-green-600"
                             )}>
                               {product.stock_quantity || 0}
@@ -759,7 +759,7 @@ const Admin = () => {
                               <Badge variant="destructive" className="text-[10px]">نفذ</Badge>
                             )}
                             {product.stock_quantity > 0 && product.stock_quantity < 10 && (
-                              <Badge variant="outline" className="text-[10px] text-orange-500 border-orange-500">قليل</Badge>
+                              <Badge variant="outline" className="text-[10px] text-destructive border-destructive">قليل</Badge>
                             )}
                           </div>
                         </TableCell>

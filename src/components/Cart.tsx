@@ -52,7 +52,7 @@ const Cart = ({ onClose }: CartProps) => {
                 <p className="text-xs text-muted-foreground mt-1">
                   {item.selectedColor} • {item.selectedSize}
                 </p>
-                <p className="text-primary font-bold mt-1">{item.product.price} ر.س</p>
+                <p className="text-primary font-bold mt-1">{item.product.price} د.ج</p>
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 bg-secondary rounded-lg">
@@ -102,7 +102,7 @@ const Cart = ({ onClose }: CartProps) => {
       <div className="p-6 border-t border-border space-y-4 bg-card">
         <div className="flex items-center justify-between text-lg font-bold">
           <span>الإجمالي:</span>
-          <span className="text-primary">{total} ر.س</span>
+          <span className="text-primary">{total} د.ج</span>
         </div>
         <Button variant="gold" size="lg" className="w-full" asChild onClick={onClose}>
           <Link to="/checkout">

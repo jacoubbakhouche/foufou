@@ -116,7 +116,7 @@ const OrderModal = ({ product, selectedColor, selectedSize, isOpen, onClose }: O
                             <img src={product.images?.[0] || product.image} alt={product.name} className="w-20 h-20 object-cover rounded-lg shadow-sm border" />
                             <div className="flex-1">
                                 <h4 className="font-bold text-lg">{product.name}</h4>
-                                <p className="text-primary font-bold text-xl">{product.price} ر.س</p>
+                                <p className="text-primary font-bold text-xl">{product.price} د.ج</p>
                             </div>
                         </div>
 
@@ -196,7 +196,7 @@ const OrderModal = ({ product, selectedColor, selectedSize, isOpen, onClose }: O
                         <div className="bg-primary/5 rounded-xl p-3 border border-primary/10 space-y-1">
                             <div className="flex justify-between text-sm">
                                 <span className="text-muted-foreground">سعر الوحدة:</span>
-                                <span className="font-medium">{product.price} ر.س</span>
+                                <span className="font-medium">{product.price} د.ج</span>
                             </div>
                             <div className="flex justify-between text-sm">
                                 <span className="text-muted-foreground">الكمية:</span>
@@ -204,7 +204,7 @@ const OrderModal = ({ product, selectedColor, selectedSize, isOpen, onClose }: O
                             </div>
                             <div className="flex justify-between text-lg font-black border-t border-primary/20 pt-1 mt-1 text-primary">
                                 <span>الإجمالي:</span>
-                                <span>{product.price * quantity} ر.س</span>
+                                <span>{product.price * quantity} د.ج</span>
                             </div>
                         </div>
                     </div>
