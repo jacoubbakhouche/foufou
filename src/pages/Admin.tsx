@@ -30,6 +30,7 @@ interface Product {
   description: string | null;
   in_stock: boolean;
   stock_quantity: number;
+  video_url?: string | null;
 }
 
 interface Order {
@@ -64,6 +65,7 @@ const Admin = () => {
     description: '',
     in_stock: true,
     stock_quantity: '0',
+    video_url: '',
   });
   const [isUploading, setIsUploading] = useState(false);
   const [newColor, setNewColor] = useState('#000000');
@@ -134,48 +136,100 @@ const Admin = () => {
       description: '',
       in_stock: true,
       stock_quantity: '0',
+      video_url: '',
     });
     setEditingProduct(null);
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-    if (productForm.images.length >= 7) {
+    const imageFiles = files.filter(file => file.type.startsWith('image/'));
+    const videoFiles = files.filter(file => file.type.startsWith('video/'));
+
+    if (productForm.images.length + imageFiles.length > 7) {
       toast.error('يمكنك رفع 7 صور كحد أقصى للمنتج الواحد');
       return;
     }
 
+    if (videoFiles.length > 1) {
+      toast.error('يمكنك رفع فيديو واحد فقط');
+      return;
+    }
+
+    if (videoFiles.length > 0 && productForm.video_url) {
+      // Logic if replacing existing video? just overwrite
+      // toast.info('سيتم استبدال الفيديو الحالي'); 
+    }
+
     setIsUploading(true);
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
-    const filePath = `products/${fileName}`;
+    const newImages: string[] = [];
+    let uploadedVideoUrl = '';
+    let errorCount = 0;
 
     try {
-      const { error: uploadError } = await supabase.storage
-        .from('product-images')
-        .upload(filePath, file);
+      // Upload Images
+      await Promise.all(imageFiles.map(async (file) => {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+        const filePath = `products/${fileName}`;
 
-      if (uploadError) {
-        if (uploadError.message.includes('bucket not found')) {
-          toast.error('خطأ: يجب إنشاء bucket باسم "product-images" في Supabase وجعله عاماً (Public)');
+        const { error: uploadError } = await supabase.storage
+          .from('product-images')
+          .upload(filePath, file);
+
+        if (uploadError) {
+          errorCount++;
+          console.error("Image Upload error:", uploadError);
         } else {
-          toast.error(`خطأ في الرفع: ${uploadError.message}`);
+          const { data: { publicUrl } } = supabase.storage
+            .from('product-images')
+            .getPublicUrl(filePath);
+          newImages.push(publicUrl);
         }
-        return;
+      }));
+
+      // Upload Video
+      if (videoFiles.length > 0) {
+        const file = videoFiles[0];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `videos/${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExt}`;
+        const filePath = `products/${fileName}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from('product-images')
+          .upload(filePath, file);
+
+        if (uploadError) {
+          toast.error(`فشل رفع الفيديو: ${uploadError.message}`);
+        } else {
+          const { data: { publicUrl } } = supabase.storage
+            .from('product-images')
+            .getPublicUrl(filePath);
+          uploadedVideoUrl = publicUrl;
+          toast.success('تم رفع الفيديو بنجاح');
+        }
       }
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('product-images')
-        .getPublicUrl(filePath);
+      if (newImages.length > 0) {
+        setProductForm(prev => ({ ...prev, images: [...prev.images, ...newImages] }));
+        toast.success(`تم رفع ${newImages.length} صور بنجاح`);
+      }
 
-      setProductForm(prev => ({ ...prev, images: [...prev.images, publicUrl] }));
-      toast.success('تم رفع الصورة بنجاح');
+      if (uploadedVideoUrl) {
+        setProductForm(prev => ({ ...prev, video_url: uploadedVideoUrl }));
+      }
+
+      if (errorCount > 0) {
+        toast.error(`فشل رفع ${errorCount} صور`);
+      }
+
     } catch (error: any) {
       toast.error('حدث خطأ غير متوقع أثناء الرفع');
     } finally {
       setIsUploading(false);
+      e.target.value = '';
     }
   };
 
@@ -214,6 +268,7 @@ const Admin = () => {
         description: product.description || '',
         in_stock: product.in_stock,
         stock_quantity: product.stock_quantity?.toString() || '0',
+        video_url: (product as any).video_url || '',
       });
     } else {
       resetProductForm();
@@ -239,6 +294,7 @@ const Admin = () => {
       description: productForm.description || null,
       in_stock: productForm.in_stock,
       stock_quantity: parseInt(productForm.stock_quantity) || 0,
+      video_url: productForm.video_url || null,
     };
 
     if (editingProduct) {
@@ -585,9 +641,12 @@ const Admin = () => {
                             </label>
                           )}
                         </div>
+
+
                         <input
                           type="file"
-                          accept="image/*"
+                          accept="image/*,video/mp4,video/webm"
+                          multiple
                           className="hidden"
                           id="image-upload"
                           onChange={handleImageUpload}
@@ -595,6 +654,22 @@ const Admin = () => {
                         />
                         <p className="text-xs text-muted-foreground mt-2 italic">أول صورة ستكون الصورة الرئيسية للمنتج</p>
                       </div>
+
+                      {productForm.video_url && (
+                        <div className="mb-4">
+                          <label className="text-sm font-medium mb-1 block">الفيديو المرفق</label>
+                          <div className="relative rounded-xl overflow-hidden aspect-video border border-border bg-black/10 group">
+                            <video src={productForm.video_url} controls className="w-full h-full object-contain" />
+                            <button
+                              type="button"
+                              onClick={() => setProductForm(prev => ({ ...prev, video_url: '' }))}
+                              className="absolute top-2 right-2 bg-destructive text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-sm z-10"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      )}
                       <div>
                         <label className="text-sm font-medium mb-1 block">التصنيف *</label>
                         <Input
@@ -807,7 +882,7 @@ const Admin = () => {
           </TabsContent>
         </Tabs>
       </main>
-    </div>
+    </div >
   );
 };
 

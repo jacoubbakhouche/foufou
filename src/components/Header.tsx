@@ -43,15 +43,12 @@ const Header = () => {
             <a href="#categories" className="text-foreground/80 hover:text-primary transition-colors font-medium">
               التصنيفات
             </a>
-            <a href="#about" className="text-foreground/80 hover:text-primary transition-colors font-medium">
-              من نحن
-            </a>
           </nav>
 
           {/* Actions */}
           <div className="flex items-center gap-3">
             {/* Cart is always visible for easy access */}
-            <CartSidebar /> {/* Fixed import assumption: CartSidebar default export */}
+            <CartSidebar />
 
             {/* Consolidated Menu */}
             <DropdownMenu>
@@ -61,8 +58,22 @@ const Header = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>الإعدادات</DropdownMenuLabel>
+                <DropdownMenuLabel>القائمة</DropdownMenuLabel>
                 <DropdownMenuSeparator />
+
+                <DropdownMenuItem onClick={() => {
+                  navigate('/');
+                  setTimeout(() => {
+                    const element = document.getElementById('products');
+                    if (element) element.scrollIntoView({ behavior: 'smooth' });
+                  }, 100);
+                }}>
+                  <span className="font-medium">المنتجات</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuLabel>الإعدادات</DropdownMenuLabel>
 
                 {/* Theme Submenu */}
                 <DropdownMenuSub>
