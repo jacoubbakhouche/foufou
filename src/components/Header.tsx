@@ -24,15 +24,14 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border">
       <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16 md:h-20">
+        <div className="flex items-center justify-between h-20 md:h-24">
           {/* Logo */}
-          <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-            <div className="flex items-center gap-2">
-              <img src="/favicon_laya.jpg" alt="laya style.23 Logo" className="h-10 w-10 md:h-12 md:w-12 rounded-full border-2 border-primary/20" />
-              <h1 className="text-xl md:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary via-primary/80 to-primary/60 tracking-tight">
-                laya style.23
-              </h1>
-            </div>
+          <div className="flex items-center cursor-pointer" onClick={() => navigate('/')}>
+            <img
+              src="/laya_logo_full.png"
+              alt="laya style.23"
+              className="h-24 w-auto object-contain"
+            />
           </div>
 
           {/* Navigation - Desktop */}

@@ -100,12 +100,58 @@ const ProductDetail = () => {
             status: 'pending'
         };
 
+        // Check and update stock
+        const { data: freshProductData, error: fetchError } = await supabase
+            .from('products')
+            .select('stock_quantity')
+            .eq('id', product.id)
+            .single();
+
+        const freshProduct = freshProductData as any;
+
+        if (fetchError || !freshProduct) {
+            toast.error('خطأ في التحقق من التوفر');
+            setIsSubmitting(false);
+            return;
+        }
+
+        if (freshProduct.stock_quantity < quantity) {
+            toast.error(`عذراً، الكمية المتوفرة حالياً: ${freshProduct.stock_quantity}`);
+            setIsSubmitting(false);
+            return;
+        }
+
+        // Deduct stock
+        const newStock = freshProduct.stock_quantity - quantity;
+        const { error: updateError } = await supabase
+            .from('products')
+            .update({
+                stock_quantity: newStock,
+                in_stock: newStock > 0
+            })
+            .eq('id', product.id);
+
+        if (updateError) {
+            toast.error('خطأ في تحديث المخزون');
+            setIsSubmitting(false);
+            return;
+        }
+
         const { error } = await supabase
             .from('orders')
             .insert([orderData]);
 
         setIsSubmitting(false);
         if (error) {
+            // Revert stock update
+            await supabase
+                .from('products')
+                .update({
+                    stock_quantity: (freshProduct.stock_quantity),
+                    in_stock: freshProduct.stock_quantity > 0
+                })
+                .eq('id', product.id);
+
             toast.error('خطأ في إرسال الطلب، يرجى المحاولة مرة أخرى');
             console.error(error);
         } else {
@@ -162,11 +208,20 @@ const ProductDetail = () => {
                     {/* Image Gallery */}
                     <div className="space-y-4">
                         <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-secondary/30 relative shadow-xl border">
-                            <img
-                                src={mainImage}
-                                alt={product.name}
-                                className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-                            />
+                            {mainImage === product.video_url ? (
+                                <video
+                                    src={mainImage}
+                                    controls
+                                    className="w-full h-full object-contain bg-black"
+                                    autoPlay
+                                />
+                            ) : (
+                                <img
+                                    src={mainImage}
+                                    alt={product.name}
+                                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                                />
+                            )}
                             {!product.inStock && (
                                 <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-[2px]">
                                     <Badge variant="destructive" className="text-xl px-6 py-2">نفذت الكمية</Badge>
@@ -174,7 +229,7 @@ const ProductDetail = () => {
                             )}
                         </div>
 
-                        {product.images.length > 1 && (
+                        {(product.images.length > 1 || product.video_url) && (
                             <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
                                 {product.images.map((img, idx) => (
                                     <button
@@ -188,6 +243,24 @@ const ProductDetail = () => {
                                         <img src={img} alt="" className="w-full h-full object-cover rounded-lg" />
                                     </button>
                                 ))}
+                                {product.video_url && (
+                                    <button
+                                        onClick={() => setMainImage(product.video_url!)}
+                                        className={cn(
+                                            "aspect-square rounded-xl overflow-hidden border-2 transition-all p-0.5 bg-white relative group",
+                                            mainImage === product.video_url ? "border-primary shadow-md scale-95" : "border-transparent opacity-70 hover:opacity-100"
+                                        )}
+                                    >
+                                        <div className="w-full h-full bg-black rounded-lg overflow-hidden relative flex items-center justify-center">
+                                            <video src={product.video_url} className="w-full h-full object-cover opacity-60" />
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <div className="w-8 h-8 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center">
+                                                    <div className="w-0 h-0 border-t-[6px] border-t-transparent border-l-[10px] border-l-white border-b-[6px] border-b-transparent ml-1"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </button>
+                                )}
                             </div>
                         )}
                     </div>

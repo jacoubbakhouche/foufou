@@ -11,6 +11,7 @@ export interface Product {
   sizes: string[];
   description: string;
   inStock: boolean;
+  stock_quantity: number;
 }
 
 export interface CartItem {

@@ -355,8 +355,22 @@ const Admin = () => {
       return;
     }
 
-    // If status changed to 'confirmed', deduct stock
-    if (newStatus === 'confirmed' && oldStatus !== 'confirmed') {
+    // Handle Stock Updates based on status change
+    // 1. If cancelling an order -> Restore stock
+    // 2. If reactivating a cancelled order -> Deduct stock
+
+    let shouldUpdateStock = false;
+    let multiplier = 0; // 1 for restore (add), -1 for deduct
+
+    if (newStatus === 'cancelled' && oldStatus !== 'cancelled') {
+      shouldUpdateStock = true;
+      multiplier = 1; // Add back to stock
+    } else if (oldStatus === 'cancelled' && newStatus !== 'cancelled') {
+      shouldUpdateStock = true;
+      multiplier = -1; // Deduct again
+    }
+
+    if (shouldUpdateStock) {
       const order = orders.find(o => o.id === orderId);
       if (order) {
         for (const item of order.items) {
@@ -364,14 +378,19 @@ const Admin = () => {
           const quantity = item.quantity || 1;
 
           // Get current product stock
-          const { data: product } = await supabase
+          const { data: productData } = await supabase
             .from('products')
             .select('stock_quantity, in_stock')
             .eq('id', productId)
             .single();
 
+          const product = productData as any;
+
           if (product) {
-            const newStock = Math.max(0, (product.stock_quantity || 0) - quantity);
+            // Calculate new stock
+            const currentStock = product.stock_quantity || 0;
+            const change = quantity * multiplier;
+            const newStock = Math.max(0, currentStock + change);
 
             // Update stock quantity and in_stock status
             await supabase
@@ -383,7 +402,7 @@ const Admin = () => {
               .eq('id', productId);
           }
         }
-        toast.success('تم تأكيد الطلب وتحديث المخزون');
+        toast.success(multiplier === 1 ? 'تم إلغاء الطلب واسترجاع المخزون' : 'تم إعادة تفعيل الطلب وتحديث المخزون');
         fetchProducts(); // Refresh products to show updated stock
       }
     } else {
@@ -478,7 +497,9 @@ const Admin = () => {
                           </div>
                           <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Phone className="h-3 w-3" />
-                            <span dir="ltr">{order.phone}</span>
+                            <a href={`tel:${order.phone}`} className="hover:text-primary hover:underline" dir="ltr">
+                              {order.phone}
+                            </a>
                           </div>
                           <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                             <MapPin className="h-3 w-3" />
@@ -524,7 +545,7 @@ const Admin = () => {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 mt-4">
+                      <div className="flex items-center gap-2 mt-4 justify-between">
                         <Select
                           value={order.status}
                           onValueChange={(value) => handleUpdateOrderStatus(order.id, value, order.status)}
@@ -535,11 +556,34 @@ const Admin = () => {
                           <SelectContent>
                             <SelectItem value="pending">قيد الانتظار</SelectItem>
                             <SelectItem value="confirmed">تم التأكيد</SelectItem>
-                            <SelectItem value="shipping">جاري الشحن</SelectItem>
-                            <SelectItem value="delivered">تم التسليم</SelectItem>
                             <SelectItem value="cancelled">ملغي</SelectItem>
                           </SelectContent>
                         </Select>
+
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={async () => {
+                            if (confirm('هل أنت متأكد من حذف هذا الطلب نهائياً؟')) {
+                              try {
+                                const { error } = await supabase.from('orders').delete().match({ id: order.id });
+                                if (error) {
+                                  console.error('Delete error:', error);
+                                  toast.error('خطأ في حذف الطلب: ' + error.message);
+                                } else {
+                                  await fetchOrders();
+                                  toast.success('تم حذف الطلب بنجاح');
+                                }
+                              } catch (err) {
+                                console.error('Delete exception:', err);
+                                toast.error('حدث خطأ أثناء الحذف');
+                              }
+                            }
+                          }}
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 className="h-5 w-5" />
+                        </Button>
                       </div>
                     </div>
                   ))}

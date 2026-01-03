@@ -12,11 +12,19 @@ interface ProductCardProps {
 
 const ProductCard = ({ product, compact = false }: ProductCardProps) => {
   const navigate = useNavigate();
-  const [selectedColor, setSelectedColor] = useState(product.colors[0]);
-  const [selectedSize, setSelectedSize] = useState(product.sizes[0]);
+  // Safe initialization for colors and sizes
+  const [selectedColor, setSelectedColor] = useState(
+    product.colors && product.colors.length > 0 ? product.colors[0] : ''
+  );
+  const [selectedSize, setSelectedSize] = useState(
+    product.sizes && product.sizes.length > 0 ? product.sizes[0] : ''
+  );
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  const images = product.images && product.images.length > 0 ? product.images : [product.image];
+  // Fallback if images array is empty but single image exists
+  const images = product.images && product.images.length > 0
+    ? product.images
+    : (product.image ? [product.image] : []);
 
   useEffect(() => {
     if (images.length <= 1) return;
@@ -61,23 +69,40 @@ const ProductCard = ({ product, compact = false }: ProductCardProps) => {
             muted
             playsInline
             autoPlay
-            className="absolute inset-0 w-full h-full object-cover z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+            className="absolute inset-0 w-full h-full object-cover z-10 opacity-100 transition-opacity duration-500"
           />
         )}
 
         {/* Hover Actions Overlay */}
-        <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-          <div className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-primary shadow-lg transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+        <div className="absolute inset-0 bg-black/5 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 z-20">
+          <div className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-primary shadow-lg transform translate-y-0 lg:translate-y-4 lg:group-hover:translate-y-0 transition-transform duration-300 hover:bg-primary hover:text-white cursor-pointer" onClick={(e) => {
+            e.preventDefault();
+            navigate(`/product/${product.id}`);
+          }}>
+            <ShoppingBag className="h-5 w-5" />
+          </div>
+          <div className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-primary shadow-lg transform translate-y-0 lg:translate-y-4 lg:group-hover:translate-y-0 transition-transform duration-300 delay-75 hover:bg-primary hover:text-white cursor-pointer">
             <Eye className="h-5 w-5" />
           </div>
         </div>
 
         {discountPercentage > 0 && (
           <span className={cn(
-            "absolute top-3 right-3 bg-destructive text-white font-bold rounded-full z-10 text-center shadow-lg",
-            compact ? "text-[10px] px-1.5 py-0.5" : "text-xs px-2 py-1"
+            "absolute top-3 right-3 bg-red-600 text-white font-black rounded-full z-50 text-center shadow-[0_0_15px_rgba(220,38,38,0.7)] animate-pulse border border-white/20",
+            compact ? "text-[10px] px-1.5 py-0.5" : "text-xs px-3 py-1.5"
           )}>
             -{discountPercentage}%
+          </span>
+        )}
+
+        {/* Stock Quantity Badge */}
+        {product.stock_quantity !== undefined && product.stock_quantity > 0 && (
+          <span className={cn(
+            "absolute top-3 left-3 bg-black/60 backdrop-blur-md text-white font-bold rounded-full z-40 text-center shadow-lg border border-white/10 flex items-center gap-1",
+            compact ? "text-[10px] px-2 py-0.5" : "text-xs px-3 py-1"
+          )}>
+            <span className="text-gold">📦</span>
+            <span>متبقي: {product.stock_quantity}</span>
           </span>
         )}
       </Link>
@@ -116,7 +141,7 @@ const ProductCard = ({ product, compact = false }: ProductCardProps) => {
         <div className="flex items-center justify-between gap-2 pt-1 border-t border-border/40">
           {/* Colors */}
           <div className="flex gap-1">
-            {product.colors.filter((_, i) => !compact || i < 3).map((color) => (
+            {product.colors && product.colors.filter((_, i) => !compact || i < 3).map((color) => (
               <button
                 key={color}
                 onClick={(e) => {
@@ -154,6 +179,5 @@ const ProductCard = ({ product, compact = false }: ProductCardProps) => {
     </div>
   );
 };
-
 
 export default ProductCard;

@@ -20,17 +20,19 @@ export const useProducts = () => {
 
       if (error) throw error;
 
-      const formattedProducts: Product[] = (data || []).map((p) => ({
+      const formattedProducts: Product[] = (data || []).map((p: any) => ({
         id: p.id,
         name: p.name,
         price: Number(p.price),
         originalPrice: p.original_price ? Number(p.original_price) : undefined,
         images: p.images || (p.image ? [p.image] : []),
+        video_url: p.video_url,
         category: p.category,
         colors: p.colors || [],
         sizes: p.sizes || [],
         description: p.description || '',
         inStock: p.in_stock,
+        stock_quantity: p.stock_quantity || 0,
       }));
 
       setProducts(formattedProducts);
@@ -56,17 +58,20 @@ export const fetchProductById = async (id: string): Promise<Product | null> => {
     if (error) throw error;
     if (!data) return null;
 
+    const productData = data as any;
     return {
       id: data.id,
       name: data.name,
       price: Number(data.price),
       originalPrice: data.original_price ? Number(data.original_price) : undefined,
       images: data.images || (data.image ? [data.image] : []),
+      video_url: data.video_url,
       category: data.category,
       colors: data.colors || [],
       sizes: data.sizes || [],
       description: data.description || '',
       inStock: data.in_stock,
+      stock_quantity: data.stock_quantity || 0,
     } as Product;
   } catch (err) {
     console.error('Error fetching product:', err);

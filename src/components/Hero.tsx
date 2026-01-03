@@ -32,7 +32,7 @@ const Hero = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="text-center lg:text-right">
             <span className="inline-block px-4 py-2 bg-gold/10 text-gold-dark dark:text-gold-light rounded-full text-sm font-semibold mb-6 animate-fade-up">
-              🎉 خصم 30% على جميع المنتجات لفترة محدودة
+              🎉 نقوم بوضع خصومات في بعض الاحيان تابعونا ليصلكم كل جديد
             </span>
 
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 animate-fade-up" style={{ animationDelay: '0.1s' }}>

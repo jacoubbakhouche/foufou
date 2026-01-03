@@ -1,4 +1,4 @@
-import { Phone, Mail, MapPin } from 'lucide-react';
+import { Phone, Mail, MapPin, Facebook, Instagram } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -14,7 +14,7 @@ const Footer = () => {
               </span>
             </div>
             <p className="text-cream/70 text-sm leading-relaxed">
-              وجهتك الأولى للطباعة المخصصة والاحترافية. نحول أفكارك إلى واقع على الأقمشة، الأغلفة، والهدايا بجودة استثنائية.
+              وجهتك الأولى للأناقة والتميز. نوفر لك أحدث صيحات الموضة والمنتجات العصرية بجودة عالية لتضفي لمسة خاصة على إطلالتك.
             </p>
           </div>
 
@@ -31,9 +31,6 @@ const Footer = () => {
               <li>
                 <a href="#" className="hover:text-gold transition-colors">سياسة الإرجاع</a>
               </li>
-              <li>
-                <a href="/auth" className="hover:text-gold transition-colors">تسجيل دخول المسؤول</a>
-              </li>
             </ul>
           </div>
 
@@ -43,7 +40,7 @@ const Footer = () => {
             <ul className="space-y-3 text-cream/70 text-sm">
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-gold" />
-                <span dir="ltr">0667486731</span>
+                <span dir="ltr">0658177627</span>
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-gold" />
@@ -54,6 +51,27 @@ const Footer = () => {
                 <span>الجزائر</span>
               </li>
             </ul>
+
+            <div className="flex gap-4 mt-6">
+              <a
+                href="https://www.facebook.com/profile.php?id=61556110481553"
+                target="_blank"
+                rel="noreferrer"
+                className="bg-cream/10 p-2 rounded-full hover:bg-gold hover:text-charcoal transition-all duration-300"
+                aria-label="Facebook"
+              >
+                <Facebook className="h-5 w-5" />
+              </a>
+              <a
+                href="https://www.instagram.com/laya_style.23?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+                target="_blank"
+                rel="noreferrer"
+                className="bg-cream/10 p-2 rounded-full hover:bg-gold hover:text-charcoal transition-all duration-300"
+                aria-label="Instagram"
+              >
+                <Instagram className="h-5 w-5" />
+              </a>
+            </div>
           </div>
         </div>
 
@@ -61,7 +79,7 @@ const Footer = () => {
           <p>© 2026 laya style.23. جميع الحقوق محفوظة.</p>
         </div>
       </div>
-    </footer>
+    </footer >
   );
 };
 

@@ -28,13 +28,13 @@ const ProductCarousel = ({ products }: ProductCarouselProps) => {
     }, [emblaApi]);
 
     return (
-        <div className="relative group/carousel">
+        <div className="relative group/carousel -mx-4 md:mx-0">
             <div className="overflow-hidden" ref={emblaRef}>
-                <div className="flex gap-4 py-4">
+                <div className="flex gap-3 md:gap-6 py-8 px-0 md:px-4 rtl:pr-0 rtl:md:pr-4 rtl:pl-4 rtl:md:pl-0">
                     {products.map((product) => (
                         <div
                             key={product.id}
-                            className="flex-[0_0_180px] sm:flex-[0_0_210px] md:flex-[0_0_240px] min-w-0"
+                            className="flex-[0_0_160px] xs:flex-[0_0_180px] sm:flex-[0_0_210px] md:flex-[0_0_240px] min-w-0 pl-1"
                         >
                             <ProductCard product={product} compact={true} />
                         </div>

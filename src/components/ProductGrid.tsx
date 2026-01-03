@@ -46,16 +46,16 @@ const ProductGrid = () => {
         </div>
 
         {/* Categories Filter */}
-        <div id="categories" className="flex flex-wrap justify-center gap-2 mb-10 px-4">
+        <div id="categories" className="flex overflow-x-auto pb-4 gap-3 px-4 no-scrollbar items-center justify-start md:justify-center touch-pan-x snap-x">
           {categories.map((category) => (
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
               className={cn(
-                'px-5 py-2 rounded-full text-sm font-medium transition-all duration-300',
+                'px-6 py-2.5 rounded-full text-base font-medium transition-all duration-300 shrink-0 whitespace-nowrap snap-center border',
                 selectedCategory === category
-                  ? 'bg-gradient-gold text-primary-foreground shadow-gold'
-                  : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
+                  ? 'bg-primary text-primary-foreground shadow-lg scale-105 border-primary'
+                  : 'bg-card text-muted-foreground hover:bg-secondary border-border/50 hover:border-border'
               )}
             >
               {category}
