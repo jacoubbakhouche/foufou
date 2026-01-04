@@ -140,21 +140,7 @@ const ProductDetail = () => {
             return;
         }
 
-        // Deduct stock
-        const newStock = freshProduct.stock_quantity - quantity;
-        const { error: updateError } = await supabase
-            .from('products')
-            .update({
-                stock_quantity: newStock,
-                in_stock: newStock > 0
-            })
-            .eq('id', product.id);
-
-        if (updateError) {
-            toast.error('خطأ في تحديث المخزون');
-            setIsSubmitting(false);
-            return;
-        }
+        // Stock deduction handled by DB Trigger
 
         const { error } = await supabase
             .from('orders')
@@ -162,15 +148,6 @@ const ProductDetail = () => {
 
         setIsSubmitting(false);
         if (error) {
-            // Revert stock update
-            await supabase
-                .from('products')
-                .update({
-                    stock_quantity: (freshProduct.stock_quantity),
-                    in_stock: freshProduct.stock_quantity > 0
-                })
-                .eq('id', product.id);
-
             toast.error('خطأ في إرسال الطلب، يرجى المحاولة مرة أخرى');
             console.error(error);
         } else {

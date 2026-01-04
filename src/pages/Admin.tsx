@@ -363,61 +363,13 @@ const Admin = () => {
       return;
     }
 
-    // Handle Stock Updates based on status change
-    // 1. If cancelling an order -> Restore stock
-    // 2. If reactivating a cancelled order -> Deduct stock
+    // DB Trigger now handles stock updates based on status changes (Cancelled <-> Other)
 
-    let shouldUpdateStock = false;
-    let multiplier = 0; // 1 for restore (add), -1 for deduct
+    toast.success('تم تحديث حالة الطلب');
 
-    if (newStatus === 'cancelled' && oldStatus !== 'cancelled') {
-      shouldUpdateStock = true;
-      multiplier = 1; // Add back to stock
-    } else if (oldStatus === 'cancelled' && newStatus !== 'cancelled') {
-      shouldUpdateStock = true;
-      multiplier = -1; // Deduct again
-    }
-
-    if (shouldUpdateStock) {
-      const order = orders.find(o => o.id === orderId);
-      if (order) {
-        for (const item of order.items) {
-          const productId = item.product?.id || item.id;
-          const quantity = item.quantity || 1;
-
-          // Get current product stock
-          const { data: productData } = await supabase
-            .from('products')
-            .select('stock_quantity, in_stock')
-            .eq('id', productId)
-            .single();
-
-          const product = productData as any;
-
-          if (product) {
-            // Calculate new stock
-            const currentStock = product.stock_quantity || 0;
-            const change = quantity * multiplier;
-            const newStock = Math.max(0, currentStock + change);
-
-            // Update stock quantity and in_stock status
-            await supabase
-              .from('products')
-              .update({
-                stock_quantity: newStock,
-                in_stock: newStock > 0
-              })
-              .eq('id', productId);
-          }
-        }
-        toast.success(multiplier === 1 ? 'تم إلغاء الطلب واسترجاع المخزون' : 'تم إعادة تفعيل الطلب وتحديث المخزون');
-        fetchProducts(); // Refresh products to show updated stock
-      }
-    } else {
-      toast.success('تم تحديث حالة الطلب');
-    }
-
-    fetchOrders();
+    // Always refresh data
+    await fetchOrders();
+    await fetchProducts();
   };
 
   const getStatusBadge = (status: string) => {
@@ -593,37 +545,16 @@ const Admin = () => {
                           onClick={async () => {
                             if (confirm('هل أنت متأكد من حذف هذا الطلب نهائياً؟')) {
                               try {
-                                // Restore stock if order is not cancelled
-                                if (order.status !== 'cancelled') {
-                                  for (const item of order.items) {
-                                    const productId = item.product?.id || item.id;
-                                    const quantity = item.quantity || 1;
-
-                                    // Get current stock
-                                    const { data: pData } = await supabase
-                                      .from('products')
-                                      .select('stock_quantity')
-                                      .eq('id', productId)
-                                      .single();
-
-                                    if (pData) {
-                                      await supabase
-                                        .from('products')
-                                        .update({
-                                          stock_quantity: (pData.stock_quantity || 0) + quantity,
-                                          in_stock: true
-                                        })
-                                        .eq('id', productId);
-                                    }
-                                  }
-                                }
+                                // DB Trigger handles stock restoration on delete automatically
 
                                 const { error } = await supabase.from('orders').delete().match({ id: order.id });
                                 if (error) {
                                   console.error('Delete error:', error);
                                   toast.error('خطأ في حذف الطلب: ' + error.message);
                                 } else {
+                                  // Always refresh data
                                   await fetchOrders();
+                                  await fetchProducts();
                                   toast.success('تم حذف الطلب واسترجاع المخزون (إن وجد)');
                                 }
                               } catch (err) {

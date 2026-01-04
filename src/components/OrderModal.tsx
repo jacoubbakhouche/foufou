@@ -125,20 +125,7 @@ const OrderModal = ({ product, selectedColor, selectedSize, isOpen, onClose }: O
             return;
         }
 
-        // Deduct stock
-        const newStock = freshProduct.stock_quantity - quantity;
-        const { error: updateError } = await supabase
-            .from('products')
-            .update({
-                stock_quantity: newStock,
-                in_stock: newStock > 0
-            })
-            .eq('id', product.id);
-
-        if (updateError) {
-            toast.error('خطأ في تحديث المخزون');
-            return;
-        }
+        // Stock deduction is now handled by DB Trigger on order insert
 
         const { error } = await supabase
             .from('orders')
@@ -146,15 +133,6 @@ const OrderModal = ({ product, selectedColor, selectedSize, isOpen, onClose }: O
 
         setLoading(false);
         if (error) {
-            // Revert stock update
-            await supabase
-                .from('products')
-                .update({
-                    stock_quantity: (freshProduct.stock_quantity),
-                    in_stock: freshProduct.stock_quantity > 0
-                })
-                .eq('id', product.id);
-
             toast.error('خطأ في إرسال الطلب، يرجى المحاولة مرة أخرى');
         } else {
             toast.success('تم إرسال طلبك بنجاح! سنتواصل معك قريباً');

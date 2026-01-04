@@ -97,7 +97,7 @@ const Checkout = () => {
         selectedSize: item.selectedSize,
       }));
 
-      // 1. Check and deduct stock for ALL items first
+      // 1. Check stock availability only (Deduction handled by DB Trigger)
       for (const item of items) {
         const { data: productData, error: productError } = await supabase
           .from('products')
@@ -111,19 +111,6 @@ const Checkout = () => {
 
         if (productData.stock_quantity < item.quantity) {
           throw new Error(t('outOfStock', { productName: item.product.name, availableQuantity: productData.stock_quantity }));
-        }
-
-        const newStock = productData.stock_quantity - item.quantity;
-        const { error: updateError } = await supabase
-          .from('products')
-          .update({
-            stock_quantity: newStock,
-            in_stock: newStock > 0
-          })
-          .eq('id', item.product.id);
-
-        if (updateError) {
-          throw new Error(t('errorUpdatingStock', { productName: item.product.name }));
         }
       }
 

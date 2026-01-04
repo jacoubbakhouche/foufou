@@ -4,7 +4,7 @@ import { useTheme } from "next-themes";
 import { useLanguage } from '@/context/LanguageContext';
 import { Button } from '@/components/ui/button';
 import CartSidebar from '@/components/CartSidebar';
-import { Settings, Moon, Sun, LogIn, User, Laptop, LogOut, CreditCard, Languages } from 'lucide-react';
+import { Settings, Moon, Sun, LogIn, User, Laptop, LogOut, CreditCard, Languages, Menu } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -54,7 +54,7 @@ const Header = () => {
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 ml-auto">
             {/* Cart is always visible for easy access */}
             <CartSidebar />
 
@@ -62,7 +62,7 @@ const Header = () => {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full bg-secondary/50 hover:bg-secondary">
-                  <Settings className="h-5 w-5 text-foreground" />
+                  <Menu className="h-5 w-5 text-foreground" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-64 rounded-[2rem] border-2 border-primary/20 bg-background/95 backdrop-blur-md shadow-xl p-3">
