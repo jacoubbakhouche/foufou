@@ -14,10 +14,7 @@ const CartSidebar = () => {
     const handleCheckout = () => {
         console.log("Navigating to checkout...");
         setIsOpen(false);
-        // Small delay to ensure sheet close animation doesn't interfere with navigation
-        setTimeout(() => {
-            navigate('/checkout');
-        }, 150);
+        navigate('/checkout');
     };
 
     return (

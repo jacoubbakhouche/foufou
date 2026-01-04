@@ -23,6 +23,7 @@ const ProductDetail = () => {
     const [mainImage, setMainImage] = useState('');
     const [selectedColor, setSelectedColor] = useState('');
     const [selectedSize, setSelectedSize] = useState('');
+    const [isZoomOpen, setIsZoomOpen] = useState(false);
     const [touchStart, setTouchStart] = useState<number | null>(null);
     const [touchEnd, setTouchEnd] = useState<number | null>(null);
 
@@ -625,7 +626,6 @@ const ProductDetail = () => {
                     onTouchMove={onTouchMove}
                     onTouchEnd={onTouchEnd}
                 >
-                    {/* Close Button */}
                     <button
                         onClick={() => setIsZoomOpen(false)}
                         className="absolute top-4 right-4 text-white/80 hover:text-white p-2 transition-colors z-[110] bg-black/20 rounded-full"
@@ -633,7 +633,6 @@ const ProductDetail = () => {
                         <X className="h-8 w-8" />
                     </button>
 
-                    {/* Prev Button (Desktop) */}
                     <button
                         onClick={(e) => { e.stopPropagation(); handlePrevImage(); }}
                         className="absolute left-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white p-3 transition-all z-[110] hover:bg-white/10 rounded-full hidden md:block"
@@ -641,17 +640,14 @@ const ProductDetail = () => {
                         <ChevronLeft className="h-10 w-10" />
                     </button>
 
-                    {/* Next Button (Desktop) */}
                     <button
                         onClick={(e) => { e.stopPropagation(); handleNextImage(); }}
                         className="absolute right-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white p-3 transition-all z-[110] hover:bg-white/10 rounded-full hidden md:block"
                     >
-                        <ArrowRight className="h-10 w-10 rotate-180" /> {/* Reusing ArrowRight as ChevronRight logic or import ChevronRight? Better use ChevronLeft rotate-180 or import. File imports ChevronLeft. I can rotate it. */}
+                        <ArrowRight className="h-10 w-10 rotate-180" />
                     </button>
 
-                    {/* Image/Video Container */}
                     <div className="relative w-full h-full flex items-center justify-center p-4">
-                        {/* Navigation Zones for Click (Mobile/Desktop convenience) */}
                         <div className="absolute inset-y-0 left-0 w-1/4 z-[105] cursor-w-resize" onClick={(e) => { e.stopPropagation(); handlePrevImage(); }} />
                         <div className="absolute inset-y-0 right-0 w-1/4 z-[105] cursor-e-resize" onClick={(e) => { e.stopPropagation(); handleNextImage(); }} />
 
@@ -673,7 +669,6 @@ const ProductDetail = () => {
                             />
                         )}
 
-                        {/* Counter */}
                         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-sm font-bold backdrop-blur-sm pointer-events-none">
                             {getAllImages().indexOf(mainImage) + 1} / {getAllImages().length}
                         </div>
