@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { fetchProductById } from '@/hooks/useProducts';
 import { useCart } from '@/context/CartContext';
@@ -23,7 +23,54 @@ const ProductDetail = () => {
     const [mainImage, setMainImage] = useState('');
     const [selectedColor, setSelectedColor] = useState('');
     const [selectedSize, setSelectedSize] = useState('');
-    const [isZoomOpen, setIsZoomOpen] = useState(false);
+    const [touchStart, setTouchStart] = useState<number | null>(null);
+    const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+    // Lightbox Navigation
+    const minSwipeDistance = 50;
+
+    const onTouchStart = (e: React.TouchEvent) => {
+        setTouchEnd(null);
+        setTouchStart(e.targetTouches[0].clientX);
+    };
+
+    const onTouchMove = (e: React.TouchEvent) => {
+        setTouchEnd(e.targetTouches[0].clientX);
+    };
+
+    const onTouchEnd = () => {
+        if (!touchStart || !touchEnd) return;
+        const distance = touchStart - touchEnd;
+        const isLeftSwipe = distance > minSwipeDistance;
+        const isRightSwipe = distance < -minSwipeDistance;
+
+        if (isLeftSwipe) {
+            handleNextImage();
+        } else if (isRightSwipe) {
+            handlePrevImage();
+        }
+    };
+
+    const getAllImages = () => {
+        if (!product || !product.images) return [];
+        const imgs = [...product.images];
+        if (product.video_url) imgs.push(product.video_url);
+        return imgs;
+    };
+
+    const handleNextImage = () => {
+        const images = getAllImages();
+        const currentIndex = images.indexOf(mainImage);
+        const nextIndex = (currentIndex + 1) % images.length;
+        setMainImage(images[nextIndex]);
+    };
+
+    const handlePrevImage = () => {
+        const images = getAllImages();
+        const currentIndex = images.indexOf(mainImage);
+        const prevIndex = (currentIndex - 1 + images.length) % images.length;
+        setMainImage(images[prevIndex]);
+    };
 
     // Order Form State
     const [quantity, setQuantity] = useState(1);
@@ -61,14 +108,27 @@ const ProductDetail = () => {
 
     const loadProduct = async (productId: string) => {
         setLoading(true);
-        const data = await fetchProductById(productId);
-        if (data) {
-            setProduct(data);
-            setMainImage(data.images[0] || '');
-            setSelectedColor(data.colors[0] || '');
-            setSelectedSize(data.sizes[0] || '');
+        try {
+            const data = await fetchProductById(productId);
+            if (data) {
+                // Ensure arrays are initialized to prevent crashes
+                const safeData = {
+                    ...data,
+                    images: data.images || [],
+                    colors: data.colors || [],
+                    sizes: data.sizes || []
+                };
+                setProduct(safeData);
+                setMainImage(safeData.images[0] || '');
+                setSelectedColor(safeData.colors[0] || '');
+                setSelectedSize(safeData.sizes[0] || '');
+            }
+        } catch (error) {
+            console.error("Error loading product:", error);
+            toast.error("حدث خطأ أثناء تحميل المنتج");
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     };
 
     const handleShare = () => {
@@ -81,12 +141,12 @@ const ProductDetail = () => {
 
         if (!product) return;
 
-        if (product.colors.length > 0 && !selectedColor) {
+        if (product.colors?.length > 0 && !selectedColor) {
             toast.error('يرجى اختيار اللون');
             window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         }
-        if (product.sizes.length > 0 && !selectedSize) {
+        if (product.sizes?.length > 0 && !selectedSize) {
             toast.error('يرجى اختيار المقاس');
             window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
@@ -164,9 +224,11 @@ const ProductDetail = () => {
         }
     };
 
+    console.log("ProductDetail Render State:", { loading, product, id });
+
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
+            <div className="min-h-screen flex items-center justify-center bg-background z-[50]">
                 <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
             </div>
         );
@@ -174,8 +236,8 @@ const ProductDetail = () => {
 
     if (!product) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center p-4">
-                <h2 className="text-2xl font-bold mb-4">المنتج غير موجود</h2>
+            <div className="min-h-screen flex flex-col items-center justify-center p-4 z-[50]">
+                <h2 className="text-2xl font-bold mb-4 text-foreground">المنتج غير موجود</h2>
                 <Button asChild>
                     <Link to="/">العودة للمتجر</Link>
                 </Button>
@@ -554,23 +616,68 @@ const ProductDetail = () => {
             </main>
 
             {/* Image Zoom Modal */}
+            {/* Image Zoom Lightbox */}
             {isZoomOpen && (
                 <div
-                    className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 animate-in fade-in duration-300"
+                    className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center animate-in fade-in duration-300 backdrop-blur-md"
                     onClick={() => setIsZoomOpen(false)}
+                    onTouchStart={onTouchStart}
+                    onTouchMove={onTouchMove}
+                    onTouchEnd={onTouchEnd}
                 >
+                    {/* Close Button */}
                     <button
                         onClick={() => setIsZoomOpen(false)}
-                        className="absolute top-4 right-4 text-white hover:text-primary p-2 transition-colors"
+                        className="absolute top-4 right-4 text-white/80 hover:text-white p-2 transition-colors z-[110] bg-black/20 rounded-full"
                     >
                         <X className="h-8 w-8" />
                     </button>
-                    <img
-                        src={mainImage}
-                        alt={product.name}
-                        className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-300"
-                        onClick={(e) => e.stopPropagation()}
-                    />
+
+                    {/* Prev Button (Desktop) */}
+                    <button
+                        onClick={(e) => { e.stopPropagation(); handlePrevImage(); }}
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white p-3 transition-all z-[110] hover:bg-white/10 rounded-full hidden md:block"
+                    >
+                        <ChevronLeft className="h-10 w-10" />
+                    </button>
+
+                    {/* Next Button (Desktop) */}
+                    <button
+                        onClick={(e) => { e.stopPropagation(); handleNextImage(); }}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-white/80 hover:text-white p-3 transition-all z-[110] hover:bg-white/10 rounded-full hidden md:block"
+                    >
+                        <ArrowRight className="h-10 w-10 rotate-180" /> {/* Reusing ArrowRight as ChevronRight logic or import ChevronRight? Better use ChevronLeft rotate-180 or import. File imports ChevronLeft. I can rotate it. */}
+                    </button>
+
+                    {/* Image/Video Container */}
+                    <div className="relative w-full h-full flex items-center justify-center p-4">
+                        {/* Navigation Zones for Click (Mobile/Desktop convenience) */}
+                        <div className="absolute inset-y-0 left-0 w-1/4 z-[105] cursor-w-resize" onClick={(e) => { e.stopPropagation(); handlePrevImage(); }} />
+                        <div className="absolute inset-y-0 right-0 w-1/4 z-[105] cursor-e-resize" onClick={(e) => { e.stopPropagation(); handleNextImage(); }} />
+
+                        {mainImage.endsWith('.mp4') || mainImage.includes('video') ? (
+                            <video
+                                src={mainImage}
+                                controls
+                                autoPlay
+                                className="max-w-full max-h-[90vh] object-contain rounded shadow-2xl"
+                                onClick={(e) => e.stopPropagation()}
+                            />
+                        ) : (
+                            <img
+                                src={mainImage}
+                                alt={product.name}
+                                className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-300 select-none"
+                                onClick={(e) => e.stopPropagation()}
+                                draggable={false}
+                            />
+                        )}
+
+                        {/* Counter */}
+                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/50 text-white px-4 py-2 rounded-full text-sm font-bold backdrop-blur-sm pointer-events-none">
+                            {getAllImages().indexOf(mainImage) + 1} / {getAllImages().length}
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

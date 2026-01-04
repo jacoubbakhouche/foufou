@@ -14,9 +14,11 @@ BEGIN
     IF (TG_OP = 'INSERT') THEN
         direction := -1; -- Deduct
     
-    -- 2. DELETE: Order Deleted -> RESTORE Stock (if not already cancelled)
+    -- 2. DELETE: Order Deleted -> RESTORE Stock ONLY if 'pending' (undo reservation)
+    -- If status is 'confirmed', it means sale was real, so we keep stock deducted.
+    -- If status is 'cancelled', stock was already restored.
     ELSIF (TG_OP = 'DELETE') THEN
-        IF (OLD.status <> 'cancelled') THEN
+        IF (OLD.status = 'pending') THEN
             direction := 1; -- Restore
         END IF;
 

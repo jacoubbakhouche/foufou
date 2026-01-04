@@ -86,7 +86,7 @@ const ProductCard = ({ product, compact = false }: ProductCardProps) => {
         <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
         {/* Badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-2 z-10">
+        <div className="absolute top-3 start-3 flex flex-col gap-2 z-10">
           {product.isNew && (
             <span className="bg-primary text-primary-foreground text-[10px] font-extrabold px-3 py-1 rounded-full shadow-gold animate-pulse border border-gold/50 tracking-wider">
               {t('new')}
@@ -116,7 +116,7 @@ const ProductCard = ({ product, compact = false }: ProductCardProps) => {
             disabled={product.stock_quantity <= 0}
             className="flex-1 bg-white/90 hover:bg-white text-black backdrop-blur-sm"
           >
-            <ShoppingBag className="w-4 h-4 mr-2" />
+            <ShoppingBag className="w-4 h-4 me-2" />
             {t('addToCart')}
           </Button>
         </div>
@@ -177,7 +177,7 @@ const ProductCard = ({ product, compact = false }: ProductCardProps) => {
           variant="gold"
           className={cn(
             "w-full rounded-xl font-bold shadow-gold group-hover:shadow-gold-lg transition-all flex items-center justify-center gap-2 text-white mt-4",
-            compact ? "h-9 text-xs" : "h-10 text-sm"
+            compact ? "h-9 text-xs" : "h-10 text-sm sm:text-xs md:text-sm"
           )}
           onClick={() => navigate(`/product/${product.id}`)}
         >
