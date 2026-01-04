@@ -17,8 +17,9 @@ const ProductCarousel = ({ products }: ProductCarouselProps) => {
         slidesToScroll: 'auto',
         containScroll: 'trimSnaps',
         loop: true,
+        loop: true,
         dragFree: true,
-    }, [Autoplay({ delay: 4000, stopOnInteraction: false, stopOnMouseEnter: true, playOnInit: true })]);
+    });
 
     const scrollPrev = useCallback(() => {
         if (emblaApi) emblaApi.scrollPrev();

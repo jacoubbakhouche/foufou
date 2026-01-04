@@ -45,10 +45,17 @@ const ProductCard = ({ product, compact = false }: ProductCardProps) => {
   };
 
   return (
-    <div className={cn(
-      "group bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-card transition-all duration-500 animate-fade-up border border-transparent hover:border-gold/20",
-      compact ? "w-full" : ""
-    )}>
+    <div
+      className={cn(
+        "group bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-card transition-all duration-500 animate-fade-up border border-transparent hover:border-gold/20",
+        compact ? "w-full" : ""
+      )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        setCurrentImageIndex(0); // Reset to first image on leave
+      }}
+    >
       <Link to={`/product/${product.id}`} className="block relative aspect-[4/5] overflow-hidden bg-cream-dark">
         {images.map((img, index) => (
           <img
