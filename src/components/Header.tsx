@@ -54,7 +54,7 @@ const Header = () => {
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center gap-3 ml-auto">
+          <div className="flex items-center gap-3 absolute right-4 top-1/2 -translate-y-1/2 md:static md:translate-y-0">
             {/* Cart is always visible for easy access */}
             <CartSidebar />
 
