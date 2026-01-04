@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      hero_settings: {
+        Row: {
+          id: string
+          promo_text_fr: string | null
+          promo_text_ar: string | null
+          title_line1_fr: string | null
+          title_line1_ar: string | null
+          title_line2_fr: string | null
+          title_line2_ar: string | null
+          description_fr: string | null
+          description_ar: string | null
+          button_text_fr: string | null
+          button_text_ar: string | null
+          images: string[] | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          promo_text_fr?: string | null
+          promo_text_ar?: string | null
+          title_line1_fr?: string | null
+          title_line1_ar?: string | null
+          title_line2_fr?: string | null
+          title_line2_ar?: string | null
+          description_fr?: string | null
+          description_ar?: string | null
+          button_text_fr?: string | null
+          button_text_ar?: string | null
+          images?: string[] | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          promo_text_fr?: string | null
+          promo_text_ar?: string | null
+          title_line1_fr?: string | null
+          title_line1_ar?: string | null
+          title_line2_fr?: string | null
+          title_line2_ar?: string | null
+          description_fr?: string | null
+          description_ar?: string | null
+          button_text_fr?: string | null
+          button_text_ar?: string | null
+          images?: string[] | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           address: string

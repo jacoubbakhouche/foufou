@@ -52,10 +52,10 @@ const ProductGrid = () => {
               key={category}
               onClick={() => setSelectedCategory(category)}
               className={cn(
-                'px-6 py-2.5 rounded-full text-base font-medium transition-all duration-300 shrink-0 whitespace-nowrap snap-center border',
+                'px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 shrink-0 whitespace-nowrap snap-center border-2 shadow-sm',
                 selectedCategory === category
-                  ? 'bg-primary text-primary-foreground shadow-lg scale-105 border-primary'
-                  : 'bg-card text-muted-foreground hover:bg-secondary border-border/50 hover:border-border'
+                  ? 'bg-gradient-gold text-black border-gold shadow-gold scale-105'
+                  : 'bg-secondary/50 text-foreground hover:bg-secondary border-border hover:border-gold/50'
               )}
             >
               {category}

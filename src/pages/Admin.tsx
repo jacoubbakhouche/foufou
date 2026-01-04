@@ -13,9 +13,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import {
   LogOut, Plus, Pencil, Trash2, Package, ShoppingCart,
-  RefreshCcw, Home, Phone, MapPin, User, Upload, X, Check, Link as LinkIcon
+  RefreshCcw, Home, Phone, MapPin, User, Upload, X, Check, Link as LinkIcon, Search
 } from 'lucide-react';
 import { toast } from 'sonner';
+
+import StoreOrganization from './admin/StoreOrganization';
 
 interface Product {
   id: string;
@@ -70,6 +72,12 @@ const Admin = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [newColor, setNewColor] = useState('#000000');
   const [newSize, setNewSize] = useState('');
+  const [productSearchTerm, setProductSearchTerm] = useState('');
+
+  const filteredProducts = products.filter(product =>
+    product.name.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
+    product.category.toLowerCase().includes(productSearchTerm.toLowerCase())
+  );
 
   useEffect(() => {
     if (!loading && !user) {
@@ -444,7 +452,7 @@ const Admin = () => {
             <div className="flex items-center gap-2">
               <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
                 <Home className="h-4 w-4" />
-                المتجر
+                العودة للمتجر
               </Button>
               <Button variant="ghost" size="sm" onClick={handleLogout}>
                 <LogOut className="h-4 w-4" />
@@ -465,6 +473,10 @@ const Admin = () => {
             <TabsTrigger value="products" className="gap-2">
               <Package className="h-4 w-4" />
               المنتجات
+            </TabsTrigger>
+            <TabsTrigger value="store-settings" className="gap-2">
+              <Pencil className="h-4 w-4" />
+              تنسيق المتجر
             </TabsTrigger>
           </TabsList>
 
@@ -504,6 +516,21 @@ const Admin = () => {
                           <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                             <MapPin className="h-3 w-3" />
                             <span>{order.address}</span>
+                          </div>
+
+                          {/* Delivery Type Badge */}
+                          <div className="mt-2">
+                            {order.address.includes('Stop Desk') ? (
+                              <Badge variant="outline" className="bg-orange-500/10 text-orange-600 border-orange-500/20 hover:bg-orange-500/20">
+                                <Package className="w-3 h-3 mr-1" />
+                                توصيل للمكتب (Stop Desk)
+                              </Badge>
+                            ) : order.address.includes('Home Delivery') ? (
+                              <Badge variant="outline" className="bg-blue-500/10 text-blue-600 border-blue-500/20 hover:bg-blue-500/20">
+                                <Home className="w-3 h-3 mr-1" />
+                                توصيل للمنزل
+                              </Badge>
+                            ) : null}
                           </div>
                         </div>
                         <div className="text-left">
@@ -566,13 +593,38 @@ const Admin = () => {
                           onClick={async () => {
                             if (confirm('هل أنت متأكد من حذف هذا الطلب نهائياً؟')) {
                               try {
+                                // Restore stock if order is not cancelled
+                                if (order.status !== 'cancelled') {
+                                  for (const item of order.items) {
+                                    const productId = item.product?.id || item.id;
+                                    const quantity = item.quantity || 1;
+
+                                    // Get current stock
+                                    const { data: pData } = await supabase
+                                      .from('products')
+                                      .select('stock_quantity')
+                                      .eq('id', productId)
+                                      .single();
+
+                                    if (pData) {
+                                      await supabase
+                                        .from('products')
+                                        .update({
+                                          stock_quantity: (pData.stock_quantity || 0) + quantity,
+                                          in_stock: true
+                                        })
+                                        .eq('id', productId);
+                                    }
+                                  }
+                                }
+
                                 const { error } = await supabase.from('orders').delete().match({ id: order.id });
                                 if (error) {
                                   console.error('Delete error:', error);
                                   toast.error('خطأ في حذف الطلب: ' + error.message);
                                 } else {
                                   await fetchOrders();
-                                  toast.success('تم حذف الطلب بنجاح');
+                                  toast.success('تم حذف الطلب واسترجاع المخزون (إن وجد)');
                                 }
                               } catch (err) {
                                 console.error('Delete exception:', err);
@@ -597,6 +649,19 @@ const Admin = () => {
             <div className="bg-card rounded-xl shadow-card p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold">إدارة المنتجات</h2>
+
+                <div className="flex items-center gap-4 flex-1 max-w-md mx-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="بحث عن منتج..."
+                      value={productSearchTerm}
+                      onChange={(e) => setProductSearchTerm(e.target.value)}
+                      className="pr-9"
+                    />
+                  </div>
+                </div>
+
                 <Dialog open={isProductDialogOpen} onOpenChange={setIsProductDialogOpen}>
                   <DialogTrigger asChild>
                     <Button variant="gold" onClick={() => openProductDialog()}>
@@ -845,7 +910,7 @@ const Admin = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {products.map((product) => (
+                    {filteredProducts.map((product) => (
                       <TableRow key={product.id}>
                         <TableCell>
                           <img
@@ -923,6 +988,10 @@ const Admin = () => {
                 </Table>
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="store-settings">
+            <StoreOrganization />
           </TabsContent>
         </Tabs>
       </main>

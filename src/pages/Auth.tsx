@@ -1,202 +1,109 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useLanguage } from '@/context/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
-import { z } from 'zod';
-
-const emailSchema = z.string().email('البريد الإلكتروني غير صالح');
-const passwordSchema = z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل');
 
 const Auth = () => {
-  const navigate = useNavigate();
-  const { user, isAdmin, loading, signIn, signUp } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
-  const [showPassword, setShowPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
-
-  useEffect(() => {
-    if (!loading && user) {
-      if (isAdmin) {
-        navigate('/admin');
-      } else {
-        navigate('/');
-      }
-    }
-  }, [user, isAdmin, loading, navigate]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const validateForm = () => {
-    try {
-      emailSchema.parse(formData.email);
-      passwordSchema.parse(formData.password);
-      return true;
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        toast.error(error.errors[0].message);
-      }
-      return false;
-    }
-  };
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { signIn, signUp } = useAuth();
+  const { t } = useLanguage();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!validateForm()) return;
-
-    setIsSubmitting(true);
+    setLoading(true);
 
     try {
       if (isLogin) {
-        const { error } = await signIn(formData.email, formData.password);
-        if (error) {
-          if (error.message.includes('Invalid login credentials')) {
-            toast.error('البريد الإلكتروني أو كلمة المرور غير صحيحة');
-          } else {
-            toast.error('حدث خطأ أثناء تسجيل الدخول');
-          }
-        } else {
-          toast.success('تم تسجيل الدخول بنجاح');
-        }
+        await signIn(email, password);
+        navigate('/');
       } else {
-        const { error } = await signUp(formData.email, formData.password);
-        if (error) {
-          if (error.message.includes('User already registered')) {
-            toast.error('هذا البريد الإلكتروني مسجل بالفعل');
-          } else {
-            toast.error('حدث خطأ أثناء إنشاء الحساب');
-          }
-        } else {
-          toast.success('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول');
-          setIsLogin(true);
-        }
+        await signUp(email, password);
+        setIsLogin(true);
+        toast.success(t('success'));
       }
+    } catch (error: any) {
+      console.error("Auth error:", error);
+      toast.error(error.message || t('error'));
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
-        <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        {/* Back Button */}
         <Button
           variant="ghost"
           onClick={() => navigate('/')}
           className="mb-6"
         >
           <ArrowRight className="h-4 w-4" />
-          العودة للمتجر
+          {t('backToStore')}
         </Button>
 
-        <div className="bg-card p-8 rounded-2xl shadow-card">
-          {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gradient-gold mb-2">
-              {isLogin ? 'تسجيل الدخول' : 'إنشاء حساب'}
-            </h1>
-            <p className="text-muted-foreground text-sm">
-              {isLogin ? 'أدخل بياناتك للوصول إلى حسابك' : 'أنشئ حساباً جديداً للمتابعة'}
-            </p>
-          </div>
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="flex items-center gap-2 text-sm font-medium mb-2">
-                <Mail className="h-4 w-4 text-primary" />
-                البريد الإلكتروني
-              </label>
-              <Input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="example@email.com"
-                className="h-12"
-                dir="ltr"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="flex items-center gap-2 text-sm font-medium mb-2">
-                <Lock className="h-4 w-4 text-primary" />
-                كلمة المرور
-              </label>
-              <div className="relative">
+        <Card className="w-full">
+          <CardHeader>
+            <CardTitle className="text-2xl text-center">
+              {isLogin ? t('welcome') : t('signUp')}
+            </CardTitle>
+            <CardDescription className="text-center">
+              {isLogin ? t('signIn') : t('signUp')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <label htmlFor="email">{t('email')}</label>
                 <Input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="••••••••"
-                  className="h-12 pl-10"
-                  dir="ltr"
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
+                  placeholder={t('email')}
+                  dir="ltr"
                 />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="password">{t('password')}</label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="******"
+                  dir="ltr"
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? (
+                  <div className="h-5 w-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                ) : (
+                  isLogin ? t('signIn') : t('signUp')
+                )}
+              </Button>
+              <div className="text-center">
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={() => setIsLogin(!isLogin)}
+                  className="text-sm text-primary hover:underline"
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {isLogin ? t('noAccount') : t('haveAccount')}
                 </button>
               </div>
-            </div>
-
-            <Button
-              type="submit"
-              variant="gold"
-              size="lg"
-              className="w-full"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                <span className="flex items-center gap-2">
-                  <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                  جاري المعالجة...
-                </span>
-              ) : isLogin ? (
-                'تسجيل الدخول'
-              ) : (
-                'إنشاء حساب'
-              )}
-            </Button>
-          </form>
-
-          {/* Toggle */}
-          <div className="text-center mt-6">
-            <p className="text-sm text-muted-foreground">
-              {isLogin ? 'ليس لديك حساب؟' : 'لديك حساب بالفعل؟'}
-              <button
-                type="button"
-                onClick={() => setIsLogin(!isLogin)}
-                className="text-primary font-medium mr-1 hover:underline"
-              >
-                {isLogin ? 'إنشاء حساب' : 'تسجيل الدخول'}
-              </button>
-            </p>
-          </div>
-        </div>
+            </form>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

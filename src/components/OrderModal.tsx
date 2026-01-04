@@ -10,6 +10,9 @@ import { toast } from 'sonner';
 import { Package, User, Phone, MapPin, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+import { useLanguage } from '@/context/LanguageContext';
+import { getShippingRate, isStopDeskAvailable } from '@/constants/shipping-rates';
+
 interface OrderModalProps {
     product: Product;
     selectedColor: string;
@@ -19,6 +22,7 @@ interface OrderModalProps {
 }
 
 const OrderModal = ({ product, selectedColor, selectedSize, isOpen, onClose }: OrderModalProps) => {
+    const { t } = useLanguage();
     const [loading, setLoading] = useState(false);
     const [localColor, setLocalColor] = useState(selectedColor);
     const [localSize, setLocalSize] = useState(selectedSize);
@@ -36,8 +40,24 @@ const OrderModal = ({ product, selectedColor, selectedSize, isOpen, onClose }: O
         phone: '',
         wilaya: '',
         commune: '',
-        address: '',
+        address: 'Home Delivery', // Default
     });
+
+    const [shippingCost, setShippingCost] = useState(0);
+
+    // Update shipping cost
+    useEffect(() => {
+        if (formData.wilaya) {
+            if (formData.address === 'Stop Desk' && !isStopDeskAvailable(formData.wilaya)) {
+                setFormData(prev => ({ ...prev, address: 'Home Delivery' }));
+            }
+
+            if (formData.address) {
+                const cost = getShippingRate(formData.wilaya, formData.address);
+                setShippingCost(cost);
+            }
+        }
+    }, [formData.wilaya, formData.address]);
 
     // Check if on Checkout page to pre-fill from Cart
     useEffect(() => {
@@ -66,7 +86,7 @@ const OrderModal = ({ product, selectedColor, selectedSize, isOpen, onClose }: O
             return;
         }
 
-        const total = product.price * quantity;
+        const total = (product.price * quantity) + shippingCost;
         const orderData = {
             customer_name: formData.name,
             phone: formData.phone,
@@ -86,12 +106,55 @@ const OrderModal = ({ product, selectedColor, selectedSize, isOpen, onClose }: O
             status: 'pending'
         };
 
+        // Check and update stock
+        const { data: freshProductData, error: fetchError } = await supabase
+            .from('products')
+            .select('stock_quantity')
+            .eq('id', product.id)
+            .single();
+
+        const freshProduct = freshProductData as any;
+
+        if (fetchError || !freshProduct) {
+            toast.error('خطأ في التحقق من التوفر');
+            return;
+        }
+
+        if (freshProduct.stock_quantity < quantity) {
+            toast.error(`عذراً، الكمية المتوفرة حالياً: ${freshProduct.stock_quantity}`);
+            return;
+        }
+
+        // Deduct stock
+        const newStock = freshProduct.stock_quantity - quantity;
+        const { error: updateError } = await supabase
+            .from('products')
+            .update({
+                stock_quantity: newStock,
+                in_stock: newStock > 0
+            })
+            .eq('id', product.id);
+
+        if (updateError) {
+            toast.error('خطأ في تحديث المخزون');
+            return;
+        }
+
         const { error } = await supabase
             .from('orders')
             .insert([orderData]);
 
         setLoading(false);
         if (error) {
+            // Revert stock update
+            await supabase
+                .from('products')
+                .update({
+                    stock_quantity: (freshProduct.stock_quantity),
+                    in_stock: freshProduct.stock_quantity > 0
+                })
+                .eq('id', product.id);
+
             toast.error('خطأ في إرسال الطلب، يرجى المحاولة مرة أخرى');
         } else {
             toast.success('تم إرسال طلبك بنجاح! سنتواصل معك قريباً');
@@ -192,6 +255,13 @@ const OrderModal = ({ product, selectedColor, selectedSize, isOpen, onClose }: O
                             </div>
                         </div>
 
+
+
+                        // ... inside handleSubmit ...
+                        const total = (product.price * quantity) + shippingCost;
+                        // ...
+
+                        // ... inside render Summary block ...
                         {/* Order Total Summary */}
                         <div className="bg-primary/5 rounded-xl p-3 border border-primary/10 space-y-1">
                             <div className="flex justify-between text-sm">
@@ -202,9 +272,13 @@ const OrderModal = ({ product, selectedColor, selectedSize, isOpen, onClose }: O
                                 <span className="text-muted-foreground">الكمية:</span>
                                 <span className="font-medium">× {quantity}</span>
                             </div>
+                            <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">التوصيل:</span>
+                                <span className="font-medium text-blue-600">{shippingCost > 0 ? `+ ${shippingCost} د.ج` : '-'}</span>
+                            </div>
                             <div className="flex justify-between text-lg font-black border-t border-primary/20 pt-1 mt-1 text-primary">
                                 <span>الإجمالي:</span>
-                                <span>{product.price * quantity} د.ج</span>
+                                <span>{(product.price * quantity) + shippingCost} د.ج</span>
                             </div>
                         </div>
                     </div>
@@ -263,16 +337,58 @@ const OrderModal = ({ product, selectedColor, selectedSize, isOpen, onClose }: O
                             </div>
                         </div>
 
-                        <div className="space-y-2">
+                        <div className="space-y-4">
                             <Label className="flex items-center gap-2">
                                 <MapPin className="h-4 w-4" />
-                                العنوان بالتفصيل
+                                {t ? t('deliveryType') : 'نوع التوصيل'}
                             </Label>
-                            <Input
-                                placeholder="اسم الشارع، رقم الباب..."
-                                value={formData.address}
-                                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                            />
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div
+                                    onClick={() => setFormData(prev => ({ ...prev, address: 'Home Delivery' }))}
+                                    className={cn(
+                                        "cursor-pointer border-2 rounded-xl p-3 transition-all hover:border-primary/50 flex flex-col items-center justify-center gap-2 text-center h-24",
+                                        formData.address === 'Home Delivery' ? "border-primary bg-primary/5" : "border-border"
+                                    )}
+                                >
+                                    <div className={cn("w-5 h-5 rounded-full border border-primary flex items-center justify-center", formData.address === 'Home Delivery' ? "bg-primary" : "bg-transparent")}>
+                                        {formData.address === 'Home Delivery' && <CheckCircle2 className="w-3 h-3 text-white" />}
+                                    </div>
+                                    <span className="font-bold text-xs">{t ? t('homeDelivery') : 'توصيل للمنزل'}</span>
+                                </div>
+
+                                <div
+                                    onClick={() => {
+                                        if (isStopDeskAvailable(formData.wilaya)) {
+                                            setFormData(prev => ({ ...prev, address: 'Stop Desk' }));
+                                        } else {
+                                            if (formData.wilaya) toast.error(t ? 'خدمة Stop Desk غير متوفرة لهذه الولاية' : 'توصيل للمكتب غير متوفر لهذه الولاية');
+                                            else toast.error('يرجى اختيار الولاية أولاً');
+                                        }
+                                    }}
+                                    className={cn(
+                                        "cursor-pointer border-2 rounded-xl p-3 transition-all flex flex-col items-center justify-center gap-2 text-center h-24 relative",
+                                        formData.address === 'Stop Desk' ? "border-primary bg-primary/5" : "border-border",
+                                        !isStopDeskAvailable(formData.wilaya) && formData.wilaya ? "opacity-50 grayscale cursor-not-allowed bg-secondary/50" : "hover:border-primary/50"
+                                    )}
+                                >
+                                    {!isStopDeskAvailable(formData.wilaya) && formData.wilaya && (
+                                        <div className="absolute inset-0 flex items-center justify-center z-10">
+                                            <span className="bg-background/90 text-destructive text-[10px] font-bold px-2 py-1 rounded shadow-sm border border-destructive/20 translate-y-8">غير متوفر</span>
+                                        </div>
+                                    )}
+                                    <div className={cn("w-5 h-5 rounded-full border border-primary flex items-center justify-center", formData.address === 'Stop Desk' ? "bg-primary" : "bg-transparent")}>
+                                        {formData.address === 'Stop Desk' && <CheckCircle2 className="w-3 h-3 text-white" />}
+                                    </div>
+                                    <span className="font-bold text-xs">{t ? t('stopDeskDelivery') : 'توصيل للمكتب'}</span>
+                                </div>
+                            </div>
+
+                            {formData.address === 'Stop Desk' && (
+                                <p className="text-xs text-muted-foreground bg-secondary/50 p-2 rounded-lg border border-border text-center">
+                                    {t ? t('stopDeskLabel') : 'يرجى استلام طلبك من المكتب الأقرب إليك'}
+                                </p>
+                            )}
                         </div>
                     </div>
 

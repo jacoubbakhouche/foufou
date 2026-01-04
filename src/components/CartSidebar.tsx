@@ -1,151 +1,124 @@
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { ShoppingBag, Trash2, Plus, Minus, ArrowLeft } from "lucide-react";
-import { useCart } from "@/context/CartContext";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useNavigate } from "react-router-dom";
-import { cn } from "@/lib/utils";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { ShoppingCart, Plus, Minus, Trash2, ArrowRight } from 'lucide-react';
+import { useCart } from '@/context/CartContext';
+import { useLanguage } from '@/context/LanguageContext';
+import { useNavigate } from 'react-router-dom';
 
 const CartSidebar = () => {
-    const { items, removeFromCart, updateQuantity, total, itemCount } = useCart();
+    const { items, total, removeFromCart, updateQuantity, isOpen, setIsOpen } = useCart();
+    const { t } = useLanguage();
     const navigate = useNavigate();
 
+    const handleCheckout = () => {
+        setIsOpen(false);
+        navigate('/checkout');
+    };
+
     return (
-        <Sheet>
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="relative text-muted-foreground hover:text-primary transition-colors"
-                    title="سلة المشتريات"
-                >
-                    <ShoppingBag className="h-6 w-6" />
-                    {itemCount > 0 && (
-                        <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white animate-scale-in border-2 border-background">
-                            {itemCount}
+                <Button variant="ghost" size="icon" className="relative h-10 w-10 rounded-full bg-secondary/50 hover:bg-secondary">
+                    <ShoppingCart className="h-5 w-5 text-foreground" />
+                    {items.length > 0 && (
+                        <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-white animate-scale-in">
+                            {items.length}
                         </span>
                     )}
                 </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-full sm:max-w-md flex flex-col p-0 bg-background/95 backdrop-blur-lg border-r border-border">
-                <SheetHeader className="px-6 py-4 border-b border-border/40">
-                    <SheetTitle className="text-xl font-bold flex items-center gap-2">
-                        <ShoppingBag className="h-5 w-5 text-primary" />
-                        سلة المشتريات
-                        <span className="text-sm font-normal text-muted-foreground mr-auto bg-secondary px-2 py-0.5 rounded-full">
-                            {itemCount} منتج
-                        </span>
+            <SheetContent side="left" className="w-full sm:w-[400px] flex flex-col p-0 border-r-4 border-primary/20 rounded-r-[3rem] overflow-hidden">
+                <SheetHeader className="p-6 border-b border-primary/10 bg-primary/5">
+                    <SheetTitle className="flex items-center justify-center gap-3 text-2xl font-black text-primary">
+                        <span className="text-3xl">🛒</span>
+                        {t('yourCart')}
+                        <span className="text-3xl">✨</span>
                     </SheetTitle>
                 </SheetHeader>
 
-                <ScrollArea className="flex-1 px-6">
+                <div className="flex-1 flex flex-col h-full overflow-hidden bg-background/50 backdrop-blur-sm">
                     {items.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-[50vh] text-center space-y-4">
-                            <div className="w-20 h-20 bg-secondary/50 rounded-full flex items-center justify-center mb-2">
-                                <ShoppingBag className="h-10 w-10 text-muted-foreground/50" />
+                        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-secondary/10">
+                            <div className="w-24 h-24 bg-white rounded-full flex items-center justify-center mb-6 shadow-xl animate-bounce">
+                                <span className="text-5xl">🥺</span>
                             </div>
-                            <div>
-                                <h3 className="text-lg font-bold">السلة فارغة</h3>
-                                <p className="text-sm text-muted-foreground">لم تقم بإضافة أي منتجات للسلة بعد</p>
-                            </div>
+                            <h3 className="text-2xl font-black mb-2 text-primary">{t('emptyCart')}</h3>
+                            <p className="text-muted-foreground mb-8 text-lg font-medium">
+                                {t('continueShopping')}
+                            </p>
+                            <Button onClick={() => setIsOpen(false)} variant="outline" className="w-full max-w-[200px] rounded-full h-12 text-lg border-2 hover:bg-primary hover:text-white transition-all">
+                                🛍️ {t('continueShopping')}
+                            </Button>
                         </div>
                     ) : (
-                        <div className="space-y-6 py-6">
-                            {items.map((item) => (
-                                <div key={`${item.product.id}-${item.selectedColor}-${item.selectedSize}`} className="flex gap-4 group">
-                                    {/* Product Image */}
-                                    <div className="w-20 h-24 rounded-lg overflow-hidden border border-border bg-secondary/10 flex-shrink-0">
-                                        <img
-                                            src={item.product.images?.[0] || item.product.image}
-                                            alt={item.product.name}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                        />
-                                    </div>
-
-                                    {/* Product Details */}
-                                    <div className="flex-1 flex flex-col justify-between">
-                                        <div>
-                                            <h4 className="font-semibold text-sm line-clamp-2 leading-relaxed">
-                                                {item.product.name}
-                                            </h4>
-                                            <div className="flex flex-wrap gap-2 mt-1 text-xs text-muted-foreground">
-                                                {item.selectedColor && (
-                                                    <span className="flex items-center gap-1">
-                                                        <span className="w-2 h-2 rounded-full border" style={{ backgroundColor: item.selectedColor }} />
-                                                        {item.selectedColor}
-                                                    </span>
-                                                )}
-                                                {item.selectedSize && (
-                                                    <span className="bg-secondary px-1.5 rounded">
-                                                        {item.selectedSize}
-                                                    </span>
-                                                )}
+                        <>
+                            <ScrollArea className="flex-1 p-4">
+                                <div className="space-y-4">
+                                    {items.map((item) => (
+                                        <div key={`${item.product.id}-${item.selectedColor}-${item.selectedSize}`} className="flex gap-4 bg-white dark:bg-card rounded-3xl p-3 border border-primary/10 shadow-sm animate-scale-in hover:shadow-md transition-all">
+                                            <div className="relative h-24 w-24 rounded-2xl overflow-hidden flex-shrink-0 border-2 border-white shadow-sm">
+                                                <img
+                                                    src={item.product.images?.[0] || item.product.image}
+                                                    alt={item.product.name}
+                                                    className="h-full w-full object-cover"
+                                                />
+                                            </div>
+                                            <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
+                                                <div>
+                                                    <h4 className="font-bold text-lg leading-tight truncate pr-4 text-primary">{item.product.name}</h4>
+                                                    <p className="text-xs text-muted-foreground mt-1 font-medium bg-secondary/50 w-fit px-2 py-1 rounded-full">
+                                                        🎨 {item.selectedColor} • 📏 {item.selectedSize}
+                                                    </p>
+                                                </div>
+                                                <div className="flex items-center justify-between mt-2">
+                                                    <div className="flex items-center gap-1 bg-secondary rounded-full p-1 shadow-inner">
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-7 w-7 rounded-full bg-white shadow-sm hover:scale-110 transition-transform"
+                                                            onClick={() => updateQuantity(item.product.id, item.selectedColor, item.selectedSize, Math.max(0, item.quantity - 1))}
+                                                        >
+                                                            <Minus className="h-3 w-3" />
+                                                        </Button>
+                                                        <span className="text-sm font-bold w-6 text-center">{item.quantity}</span>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="icon"
+                                                            className="h-7 w-7 rounded-full bg-white shadow-sm hover:scale-110 transition-transform text-primary"
+                                                            onClick={() => updateQuantity(item.product.id, item.selectedColor, item.selectedSize, item.quantity + 1)}
+                                                        >
+                                                            <Plus className="h-3 w-3" />
+                                                        </Button>
+                                                    </div>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="icon"
+                                                        className="h-9 w-9 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full"
+                                                        onClick={() => removeFromCart(item.product.id, item.selectedColor, item.selectedSize)}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
                                             </div>
                                         </div>
-
-                                        <div className="flex items-center justify-between mt-2">
-                                            <div className="flex items-center gap-3 bg-secondary/30 rounded-lg p-1 border border-border/50">
-                                                <button
-                                                    onClick={() => updateQuantity(item.product.id, item.selectedColor, item.selectedSize, item.quantity - 1)}
-                                                    className="w-6 h-6 flex items-center justify-center hover:bg-background rounded-md transition-colors"
-                                                    disabled={item.quantity <= 1}
-                                                >
-                                                    <Minus className="h-3 w-3" />
-                                                </button>
-                                                <span className="text-sm font-medium w-4 text-center">{item.quantity}</span>
-                                                <button
-                                                    onClick={() => updateQuantity(item.product.id, item.selectedColor, item.selectedSize, item.quantity + 1)}
-                                                    className="w-6 h-6 flex items-center justify-center hover:bg-background rounded-md transition-colors"
-                                                >
-                                                    <Plus className="h-3 w-3" />
-                                                </button>
-                                            </div>
-
-                                            <div className="text-right">
-                                                <p className="font-bold text-primary">
-                                                    {item.product.price * item.quantity} د.ج
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Remove Button */}
-                                    <button
-                                        onClick={() => removeFromCart(item.product.id, item.selectedColor, item.selectedSize)}
-                                        className="text-muted-foreground hover:text-destructive transition-colors self-start p-1"
-                                        title="حذف المنتج"
-                                    >
-                                        <Trash2 className="h-4 w-4" />
-                                    </button>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
+                            </ScrollArea>
+                            <div className="p-6 border-t bg-white/50 dark:bg-black/20 backdrop-blur-md">
+                                <div className="space-y-3 mb-6">
+                                    <div className="flex items-center justify-between font-black text-xl">
+                                        <span>{t('total')}</span>
+                                        <span className="text-primary">{total} {t('currency')}</span>
+                                    </div>
+                                </div>
+                                <Button onClick={handleCheckout} className="w-full h-14 text-xl font-black shadow-xl shadow-primary/20 rounded-2xl bg-gradient-to-r from-primary to-primary/80 hover:scale-[1.02] transition-transform" variant="gold">
+                                    ✨ {t('checkout')} ➡️
+                                </Button>
+                            </div>
+                        </>
                     )}
-                </ScrollArea>
-
-                {/* Footer */}
-                {items.length > 0 && (
-                    <div className="p-6 border-t border-border bg-secondary/5 space-y-4">
-                        <div className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">المجموع الفرعي</span>
-                                <span className="font-medium">{total} د.ج</span>
-                            </div>
-                            <div className="flex justify-between text-lg font-bold border-t border-border/50 pt-2 text-primary">
-                                <span>الإجمالي</span>
-                                <span>{total} د.ج</span>
-                            </div>
-                        </div>
-
-                        <Button
-                            className="w-full h-12 text-lg font-bold bg-gradient-gold hover:opacity-90 transition-all shadow-gold"
-                            onClick={() => navigate('/checkout')}
-                        >
-                            <span>إتمام الطلب</span>
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                        </Button>
-                    </div>
-                )}
+                </div>
             </SheetContent>
         </Sheet>
     );

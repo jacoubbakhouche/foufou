@@ -348,6 +348,62 @@ export const ALGERIA_DATA: Wilaya[] = [
         code: 58, name: "In Guezzam", ar_name: "عين قزام", communes: [
             { code: 5801, name: "In Guezzam", ar_name: "عين قزام", wilaya_code: 58 }
         ]
+    },
+    // New Delegated Wilayas
+    {
+        code: 59, name: "Aflou", ar_name: "أفلو", communes: [
+            { code: 5901, name: "Aflou", ar_name: "أفلو", wilaya_code: 59 }
+        ]
+    },
+    {
+        code: 60, name: "Barika", ar_name: "بريكة", communes: [
+            { code: 6001, name: "Barika", ar_name: "بريكة", wilaya_code: 60 }
+        ]
+    },
+    {
+        code: 61, name: "Ksar Chellala", ar_name: "قصر الشلالة", communes: [
+            { code: 6101, name: "Ksar Chellala", ar_name: "قصر الشلالة", wilaya_code: 61 }
+        ]
+    },
+    {
+        code: 62, name: "Ain Oussera", ar_name: "عين وسارة", communes: [
+            { code: 6201, name: "Ain Oussera", ar_name: "عين وسارة", wilaya_code: 62 }
+        ]
+    },
+    {
+        code: 63, name: "Messaad", ar_name: "مسعد", communes: [
+            { code: 6301, name: "Messaad", ar_name: "مسعد", wilaya_code: 63 }
+        ]
+    },
+    {
+        code: 64, name: "Bousaada", ar_name: "بوسعادة", communes: [
+            { code: 6401, name: "Bousaada", ar_name: "بوسعادة", wilaya_code: 64 }
+        ]
+    },
+    {
+        code: 65, name: "El Abiodh Sidi Cheikh", ar_name: "الأبيض سيدي الشيخ", communes: [
+            { code: 6501, name: "El Abiodh Sidi Cheikh", ar_name: "الأبيض سيدي الشيخ", wilaya_code: 65 }
+        ]
+    },
+    {
+        code: 66, name: "Ksar El Boukhari", ar_name: "قصر البخاري", communes: [
+            { code: 6601, name: "Ksar El Boukhari", ar_name: "قصر البخاري", wilaya_code: 66 }
+        ]
+    },
+    {
+        code: 67, name: "Bir El Ater", ar_name: "بئر العاتر", communes: [
+            { code: 6701, name: "Bir El Ater", ar_name: "بئر العاتر", wilaya_code: 67 }
+        ]
+    },
+    {
+        code: 68, name: "El Kantara", ar_name: "القنطرة", communes: [
+            { code: 6801, name: "El Kantara", ar_name: "القنطرة", wilaya_code: 68 }
+        ]
+    },
+    {
+        code: 69, name: "El Aricha", ar_name: "العريشة", communes: [
+            { code: 6901, name: "El Aricha", ar_name: "العريشة", wilaya_code: 69 }
+        ]
     }
 ];
 

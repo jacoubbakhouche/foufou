@@ -12,6 +12,7 @@ export interface Product {
   description: string;
   inStock: boolean;
   stock_quantity: number;
+  isNew?: boolean;
 }
 
 export interface CartItem {

@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import LocationPicker from '@/components/LocationPicker';
+import { getShippingRate, isStopDeskAvailable } from '@/constants/shipping-rates';
 import { supabase } from '@/integrations/supabase/client';
 
 const ProductDetail = () => {
@@ -32,8 +33,25 @@ const ProductDetail = () => {
         phone: '',
         wilaya: '',
         commune: '',
-        address: '',
+        address: 'Home Delivery',
     });
+
+    const [shippingCost, setShippingCost] = useState(0);
+
+    // Update shipping cost when inputs change
+    useEffect(() => {
+        if (formData.wilaya) {
+            // Reset to Home Delivery if Stop Desk is not available for selected wilaya
+            if (formData.address === 'Stop Desk' && !isStopDeskAvailable(formData.wilaya)) {
+                setFormData(prev => ({ ...prev, address: 'Home Delivery' }));
+            }
+
+            if (formData.address) {
+                const cost = getShippingRate(formData.wilaya, formData.address);
+                setShippingCost(cost);
+            }
+        }
+    }, [formData.wilaya, formData.address]);
 
     useEffect(() => {
         if (id) {
@@ -81,7 +99,7 @@ const ProductDetail = () => {
 
         setIsSubmitting(true);
 
-        const total = product.price * quantity;
+        const total = (product.price * quantity) + shippingCost;
         const orderData = {
             customer_name: formData.name,
             phone: formData.phone,
@@ -353,13 +371,7 @@ const ProductDetail = () => {
                                 </div>
                             </div>
 
-                            {/* Description */}
-                            <div className="bg-secondary/20 p-6 rounded-2xl border border-border/50">
-                                <h3 className="text-lg font-bold mb-3">وصف المنتج</h3>
-                                <p className="text-muted-foreground leading-relaxed">
-                                    {product.description || 'لا يوجد وصف متاح لهذا المنتج.'}
-                                </p>
-                            </div>
+
 
                             {/* ----------------- ORDER FORM ----------------- */}
                             <div className="bg-card rounded-2xl shadow-card p-6 border border-border/50 mt-8">
@@ -429,26 +441,80 @@ const ProductDetail = () => {
                                         </div>
                                     </div>
 
-                                    <div className="space-y-2">
+                                    <div className="space-y-4">
                                         <Label className="flex items-center gap-2">
                                             <MapPin className="h-4 w-4" />
-                                            العنوان بالتفصيل
+                                            نوع التوصيل
                                         </Label>
-                                        <Input
-                                            placeholder="اسم الشارع، رقم الباب..."
-                                            value={formData.address}
-                                            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                                            className="bg-background"
-                                        />
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div
+                                                onClick={() => setFormData(prev => ({ ...prev, address: 'Home Delivery' }))}
+                                                className={cn(
+                                                    "cursor-pointer border-2 rounded-xl p-3 transition-all hover:border-primary/50 flex flex-col items-center justify-center gap-2 text-center h-24",
+                                                    formData.address === 'Home Delivery' ? "border-primary bg-primary/5" : "border-border"
+                                                )}
+                                            >
+                                                <div className={cn("w-5 h-5 rounded-full border border-primary flex items-center justify-center", formData.address === 'Home Delivery' ? "bg-primary" : "bg-transparent")}>
+                                                    {formData.address === 'Home Delivery' && <CheckCircle2 className="w-3 h-3 text-white" />}
+                                                </div>
+                                                <span className="font-bold text-xs">توصيل للمنزل</span>
+                                            </div>
+
+                                            <div
+                                                onClick={() => {
+                                                    if (isStopDeskAvailable(formData.wilaya)) {
+                                                        setFormData(prev => ({ ...prev, address: 'Stop Desk' }));
+                                                    } else {
+                                                        if (formData.wilaya) toast.error('توصيل للمكتب غير متوفر لهذه الولاية');
+                                                        else toast.error('يرجى اختيار الولاية أولاً');
+                                                    }
+                                                }}
+                                                className={cn(
+                                                    "cursor-pointer border-2 rounded-xl p-3 transition-all flex flex-col items-center justify-center gap-2 text-center h-24 relative",
+                                                    formData.address === 'Stop Desk' ? "border-primary bg-primary/5" : "border-border",
+                                                    !isStopDeskAvailable(formData.wilaya) && formData.wilaya ? "opacity-50 grayscale cursor-not-allowed bg-secondary/50" : "hover:border-primary/50"
+                                                )}
+                                            >
+                                                {!isStopDeskAvailable(formData.wilaya) && formData.wilaya && (
+                                                    <div className="absolute inset-0 flex items-center justify-center z-10">
+                                                        <span className="bg-background/90 text-destructive text-[10px] font-bold px-2 py-1 rounded shadow-sm border border-destructive/20 translate-y-8">غير متوفر</span>
+                                                    </div>
+                                                )}
+                                                <div className={cn("w-5 h-5 rounded-full border border-primary flex items-center justify-center", formData.address === 'Stop Desk' ? "bg-primary" : "bg-transparent")}>
+                                                    {formData.address === 'Stop Desk' && <CheckCircle2 className="w-3 h-3 text-white" />}
+                                                </div>
+                                                <span className="font-bold text-xs">توصيل للمكتب</span>
+                                            </div>
+                                        </div>
+                                        {formData.address === 'Stop Desk' && (
+                                            <p className="text-xs text-muted-foreground bg-secondary/50 p-2 rounded-lg border border-border text-center">
+                                                يرجى استلام طلبك من المكتب الأقرب إليك
+                                            </p>
+                                        )}
                                     </div>
 
+
+
+
+
                                     {/* Order Summary in Form */}
-                                    <div className="bg-secondary/30 rounded-xl p-4 mt-6 border border-border/50">
-                                        <div className="flex justify-between items-center mb-2">
-                                            <span className="text-muted-foreground">السعر الإجمالي:</span>
-                                            <span className="font-bold text-xl text-primary">{product.price * quantity} د.ج</span>
+                                    <div className="bg-secondary/30 rounded-xl p-4 mt-6 border border-border/50 space-y-2">
+                                        <div className="flex justify-between items-center text-sm">
+                                            <span className="text-muted-foreground">سعر المنتج:</span>
+                                            <span className="font-medium">{product.price * quantity} د.ج</span>
                                         </div>
-                                        <div className="flex items-center gap-2 text-xs text-green-600 font-bold bg-green-500/10 px-2 py-1 rounded w-fit">
+                                        <div className="flex justify-between items-center text-sm">
+                                            <span className="text-muted-foreground">التوصيل:</span>
+                                            <span className="font-medium text-blue-600">
+                                                {shippingCost > 0 ? `+ ${shippingCost} د.ج` : 'اختر الولاية'}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center border-t border-border/50 pt-2 mt-2">
+                                            <span className="font-bold text-lg">المجموع الكلي:</span>
+                                            <span className="font-bold text-xl text-primary">{(product.price * quantity) + shippingCost} د.ج</span>
+                                        </div>
+
+                                        <div className="flex items-center gap-2 text-xs text-green-600 font-bold bg-green-500/10 px-2 py-1 rounded w-fit mt-2">
                                             <CheckCircle2 className="h-3 w-3" />
                                             توصيل سريع 58 ولاية
                                         </div>
@@ -495,6 +561,17 @@ const ProductDetail = () => {
                                 </form>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                {/* Description Section - Moved to Bottom */}
+                <div className="mt-16 bg-card rounded-2xl p-8 border border-border/50 shadow-sm">
+                    <h3 className="text-2xl font-bold mb-4 flex items-center gap-2 text-primary">
+                        <span className="w-2 h-8 bg-primary rounded-full inline-block"></span>
+                        وصف المنتج
+                    </h3>
+                    <div className="prose prose-lg dark:prose-invert max-w-none text-muted-foreground leading-loose">
+                        {product.description || 'لا يوجد وصف متاح لهذا المنتج.'}
                     </div>
                 </div>
             </main>
