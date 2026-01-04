@@ -6,7 +6,7 @@ import { Product } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Header from '@/components/Header';
-import { ChevronLeft, ShoppingBag, ArrowRight, Share2, Check, User, Phone, MapPin, CheckCircle2, Package } from 'lucide-react';
+import { ChevronLeft, ShoppingBag, ArrowRight, Share2, Check, User, Phone, MapPin, CheckCircle2, Package, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
@@ -22,6 +22,7 @@ const ProductDetail = () => {
     const [mainImage, setMainImage] = useState('');
     const [selectedColor, setSelectedColor] = useState('');
     const [selectedSize, setSelectedSize] = useState('');
+    const [isZoomOpen, setIsZoomOpen] = useState(false);
 
     // Order Form State
     const [quantity, setQuantity] = useState(1);
@@ -219,7 +220,8 @@ const ProductDetail = () => {
                                 <img
                                     src={mainImage}
                                     alt={product.name}
-                                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                                    className="w-full h-full object-cover transition-transform duration-500 hover:scale-105 cursor-zoom-in"
+                                    onClick={() => setIsZoomOpen(true)}
                                 />
                             )}
                             {!product.inStock && (
@@ -496,6 +498,27 @@ const ProductDetail = () => {
                     </div>
                 </div>
             </main>
+
+            {/* Image Zoom Modal */}
+            {isZoomOpen && (
+                <div
+                    className="fixed inset-0 z-[100] bg-black/95 flex items-center justify-center p-4 animate-in fade-in duration-300"
+                    onClick={() => setIsZoomOpen(false)}
+                >
+                    <button
+                        onClick={() => setIsZoomOpen(false)}
+                        className="absolute top-4 right-4 text-white hover:text-primary p-2 transition-colors"
+                    >
+                        <X className="h-8 w-8" />
+                    </button>
+                    <img
+                        src={mainImage}
+                        alt={product.name}
+                        className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-300"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                </div>
+            )}
         </div>
     );
 };
