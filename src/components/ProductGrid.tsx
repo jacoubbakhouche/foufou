@@ -71,7 +71,7 @@ const ProductGrid = () => {
                 <div className="flex items-center gap-4 mb-6 px-4">
                   <div className="h-px bg-border flex-1" />
                   <span className="text-sm font-bold text-muted-foreground whitespace-nowrap px-4 py-1 bg-secondary rounded-full">
-                    المجموعة {index + 1}
+                    {index + 1}
                   </span>
                   <div className="h-px bg-border flex-1" />
                 </div>

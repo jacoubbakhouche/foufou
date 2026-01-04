@@ -13,19 +13,23 @@ import Admin from "./pages/Admin";
 import ProductDetail from "./pages/ProductDetail";
 import NotFound from "./pages/NotFound";
 
+import SnowEffect from "@/components/SnowEffect";
+
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme" attribute="class">
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme" attribute="class">
       <AuthProvider>
         <CartProvider>
           <TooltipProvider>
             <Toaster />
             <Sonner position="top-center" richColors />
+            <SnowEffect />
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Index />} />
+                {/* <Route path="/store" element={<Index />} /> */}
                 <Route path="/checkout" element={<Checkout />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/admin" element={<Admin />} />

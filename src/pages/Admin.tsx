@@ -47,7 +47,7 @@ interface Order {
 
 const Admin = () => {
   const navigate = useNavigate();
-  const { user, isAdmin, loading, signOut } = useAuth();
+  const { user, isAdmin, loading, checkingRole, signOut } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -74,11 +74,11 @@ const Admin = () => {
   useEffect(() => {
     if (!loading && !user) {
       navigate('/auth');
-    } else if (!loading && user && !isAdmin) {
+    } else if (!loading && !checkingRole && user && !isAdmin) { // Wait for checkingRole to complete
       toast.error('غير مصرح لك بالوصول');
       navigate('/');
     }
-  }, [user, isAdmin, loading, navigate]);
+  }, [user, isAdmin, loading, checkingRole, navigate]);
 
   useEffect(() => {
     if (isAdmin) {

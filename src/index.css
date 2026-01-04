@@ -213,6 +213,19 @@
     -ms-overflow-style: none;
     /* IE and Edge */
     scrollbar-width: none;
-    /* Firefox */
+  }
+}
+
+@keyframes snowfall {
+  0% {
+    transform: translateY(-10px) translateX(-5px);
+  }
+
+  50% {
+    transform: translateY(50vh) translateX(5px);
+  }
+
+  100% {
+    transform: translateY(110vh) translateX(-5px);
   }
 }
