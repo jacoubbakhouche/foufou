@@ -182,7 +182,7 @@ const ProductCard = ({ product, compact = false }: ProductCardProps) => {
           onClick={() => navigate(`/product/${product.id}`)}
         >
           <ShoppingBag className={compact ? "h-3.5 w-3.5" : "h-4 w-4"} />
-          <span>شراء الآن</span>
+          <span>{t('buyNow')}</span>
         </Button>
       </div>
     </div>

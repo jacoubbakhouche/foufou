@@ -74,6 +74,11 @@ export const translations = {
         orderSuccessMessage: 'Notre équipe vous contactera sous peu pour confirmer.',
         backToStore: 'Retour à la boutique',
         autoFill: 'Informations remplies automatiquement depuis votre profil',
+        buyNow: 'Acheter maintenant',
+        fullNamePlaceholder: 'Entrez votre nom complet',
+        phonePlaceholder: '05xxxxxxxx',
+        selectWilaya: 'Sélectionner la Wilaya',
+        selectCommune: 'Sélectionner la Commune',
 
         // Profile
         myProfile: 'Mon Profil',
@@ -204,6 +209,11 @@ export const translations = {
         orderSuccessMessage: 'سيتواصل معك فريقنا قريباً لتأكيد الطلب.',
         backToStore: 'العودة للمتجر',
         autoFill: 'تم ملء المعلومات تلقائياً من ملفك الشخصي',
+        buyNow: 'شراء الآن',
+        fullNamePlaceholder: 'أدخل الاسم الكامل',
+        phonePlaceholder: '05xxxxxxxx',
+        selectWilaya: 'اختر الولاية',
+        selectCommune: 'اختر البلدية',
 
         // Profile
         myProfile: 'الملف الشخصي',

@@ -20,7 +20,7 @@ import {
 const Header = () => {
   const navigate = useNavigate();
   const { user, isAdmin, signOut } = useAuth();
-  const { setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const { language, setLanguage, t } = useLanguage();
 
   return (
@@ -97,43 +97,24 @@ const Header = () => {
 
                 <DropdownMenuLabel className="text-xs text-muted-foreground text-center mb-1">⚙️ {t('settings')}</DropdownMenuLabel>
 
-                {/* Language Submenu */}
-                <DropdownMenuSub>
-                  <DropdownMenuSubTrigger className="rounded-xl h-10">
-                    <span className="text-lg mr-2">🌍</span>
-                    <span>Language / اللغة</span>
-                  </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent className="rounded-2xl border-primary/20">
-                    <DropdownMenuItem onClick={() => setLanguage('fr')} className={language === 'fr' ? 'bg-pink-50 text-pink-600 font-bold rounded-xl' : 'rounded-xl'}>
-                      <span>🇫🇷 Français</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setLanguage('ar')} className={language === 'ar' ? 'bg-pink-50 text-pink-600 font-bold rounded-xl' : 'rounded-xl'}>
-                      <span className="font-arabic">🇩🇿 العربية</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuSubContent>
-                </DropdownMenuSub>
+                {/* Language Direct Selection */}
+                <div className="grid grid-cols-2 gap-2 mb-2">
+                  <DropdownMenuItem onClick={() => setLanguage('ar')} className={`rounded-xl justify-center cursor-pointer ${language === 'ar' ? 'bg-pink-50 text-pink-600 font-bold border border-pink-200' : 'bg-secondary/30'}`}>
+                    <span className="mr-1">🇩🇿</span> العربية
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setLanguage('fr')} className={`rounded-xl justify-center cursor-pointer ${language === 'fr' ? 'bg-pink-50 text-pink-600 font-bold border border-pink-200' : 'bg-secondary/30'}`}>
+                    <span className="mr-1">🇫🇷</span> Français
+                  </DropdownMenuItem>
+                </div>
 
-                {/* Theme Submenu */}
-                <DropdownMenuSub>
-                  <DropdownMenuSubTrigger className="rounded-xl h-10">
-                    <span className="text-lg mr-2">🎨</span>
-                    <span>{t('theme')}</span>
-                  </DropdownMenuSubTrigger>
-                  <DropdownMenuSubContent className="rounded-2xl border-primary/20">
-                    <DropdownMenuItem onClick={() => setTheme("light")} className="rounded-xl">
-                      <Sun className="mr-2 h-4 w-4 text-orange-400" />
-                      {t('light')}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setTheme("dark")} className="rounded-xl">
-                      <Moon className="mr-2 h-4 w-4 text-indigo-400" />
-                      {t('dark')}
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => setTheme("system")} className="rounded-xl">
-                      <Laptop className="mr-2 h-4 w-4 text-gray-400" />
-                      {t('system')}
-                    </DropdownMenuItem>
-                  </DropdownMenuSubContent>
-                </DropdownMenuSub>
+                {/* Theme Direct Toggle */}
+                <DropdownMenuItem
+                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                  className="rounded-xl h-10 cursor-pointer justify-center bg-secondary/30 hover:bg-secondary/50"
+                >
+                  <span className="text-lg mr-2">{theme === 'dark' ? '☀️' : '🌙'}</span>
+                  <span>{theme === 'dark' ? t('light') : t('dark')}</span>
+                </DropdownMenuItem>
 
                 <DropdownMenuSeparator className="bg-primary/10 my-2" />
 

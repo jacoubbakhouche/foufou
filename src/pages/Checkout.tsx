@@ -230,7 +230,7 @@ const Checkout = () => {
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  placeholder="05xxxxxxxx"
+                  placeholder={t('phonePlaceholder')}
                   className="h-12"
                   dir="ltr"
                   required
