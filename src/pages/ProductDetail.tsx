@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { fetchProductById } from '@/hooks/useProducts';
 import { useCart } from '@/context/CartContext';
 import { Product } from '@/types';
@@ -101,11 +101,33 @@ const ProductDetail = () => {
         }
     }, [formData.wilaya, formData.address]);
 
+    const [searchParams] = useSearchParams();
+
     useEffect(() => {
         if (id) {
             loadProduct(id);
         }
     }, [id]);
+
+    // Handle URL parameters for pre-filling (e.g. coming from Cart)
+    useEffect(() => {
+        if (!product) return;
+
+        const colorParam = searchParams.get('color');
+        const sizeParam = searchParams.get('size');
+        const qtyParam = searchParams.get('quantity');
+        const shouldScroll = searchParams.get('scrollToOrder');
+
+        if (shouldScroll === 'true') {
+            // Small delay to ensure render
+            setTimeout(() => {
+                const orderSection = document.getElementById('order-form-section');
+                if (orderSection) {
+                    orderSection.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, 500);
+        }
+    }, [product, searchParams]);
 
     const loadProduct = async (productId: string) => {
         setLoading(true);
@@ -414,7 +436,7 @@ const ProductDetail = () => {
 
 
                             {/* ----------------- ORDER FORM ----------------- */}
-                            <div className="bg-card rounded-2xl shadow-card p-6 border border-border/50 mt-8">
+                            <div id="order-form-section" className="bg-card rounded-2xl shadow-card p-6 border border-border/50 mt-8">
                                 <div className="flex items-center gap-3 mb-6 pb-4 border-b">
                                     <div className="bg-primary/10 p-2 rounded-full">
                                         <Package className="h-6 w-6 text-primary" />

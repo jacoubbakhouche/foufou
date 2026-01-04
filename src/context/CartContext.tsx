@@ -10,12 +10,15 @@ interface CartContextType {
   clearCart: () => void;
   total: number;
   itemCount: number;
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
 
   const addToCart = (product: Product, color: string, size: string) => {
     setItems((prev) => {
@@ -28,16 +31,18 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
       if (existingItem) {
         toast.success('تم تحديث الكمية في السلة');
+        setIsOpen(true); // Auto-open cart on add
         return prev.map((item) =>
           item.product.id === product.id &&
-          item.selectedColor === color &&
-          item.selectedSize === size
+            item.selectedColor === color &&
+            item.selectedSize === size
             ? { ...item, quantity: item.quantity + 1 }
             : item
         );
       }
 
       toast.success('تمت الإضافة إلى السلة');
+      setIsOpen(true); // Auto-open cart on add
       return [...prev, { product, quantity: 1, selectedColor: color, selectedSize: size }];
     });
   };
@@ -64,8 +69,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     setItems((prev) =>
       prev.map((item) =>
         item.product.id === productId &&
-        item.selectedColor === color &&
-        item.selectedSize === size
+          item.selectedColor === color &&
+          item.selectedSize === size
           ? { ...item, quantity }
           : item
       )
@@ -81,7 +86,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <CartContext.Provider
-      value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, total, itemCount }}
+      value={{ items, addToCart, removeFromCart, updateQuantity, clearCart, total, itemCount, isOpen, setIsOpen }}
     >
       {children}
     </CartContext.Provider>

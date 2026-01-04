@@ -79,6 +79,7 @@ export const translations = {
         phonePlaceholder: '05xxxxxxxx',
         selectWilaya: 'Sélectionner la Wilaya',
         selectCommune: 'Sélectionner la Commune',
+        paymentMethod: 'Paiement à la livraison - Livraison rapide 58 wilayas',
 
         // Profile
         myProfile: 'Mon Profil',
@@ -214,6 +215,7 @@ export const translations = {
         phonePlaceholder: '05xxxxxxxx',
         selectWilaya: 'اختر الولاية',
         selectCommune: 'اختر البلدية',
+        paymentMethod: 'الدفع عند الاستلام - توصيل سريع 58 ولاية',
 
         // Profile
         myProfile: 'الملف الشخصي',

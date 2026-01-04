@@ -4,7 +4,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { ShoppingCart, Plus, Minus, Trash2, ArrowRight } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 
 const CartSidebar = () => {
     const { items, total, removeFromCart, updateQuantity, isOpen, setIsOpen } = useCart();
@@ -12,9 +12,17 @@ const CartSidebar = () => {
     const navigate = useNavigate();
 
     const handleCheckout = () => {
-        console.log("Navigating to checkout...");
         setIsOpen(false);
-        navigate('/checkout');
+
+        if (items.length === 1) {
+            const item = items[0];
+            const params = new URLSearchParams({
+                scrollToOrder: 'true'
+            });
+            navigate(`/product/${item.product.id}?${params.toString()}`);
+        } else {
+            navigate('/checkout');
+        }
     };
 
     return (
@@ -113,7 +121,11 @@ const CartSidebar = () => {
                                         <span className="text-primary">{total} {t('currency')}</span>
                                     </div>
                                 </div>
-                                <Button onClick={handleCheckout} className="w-full h-14 text-xl font-black shadow-xl shadow-primary/20 rounded-2xl bg-gradient-to-r from-primary to-primary/80 hover:scale-[1.02] transition-transform" variant="gold">
+                                <Button
+                                    onClick={handleCheckout}
+                                    className="w-full h-14 text-xl font-black shadow-xl shadow-primary/20 rounded-2xl bg-gradient-to-r from-primary to-primary/80 hover:scale-[1.02] transition-transform"
+                                    variant="gold"
+                                >
                                     ✨ {t('checkout')} ➡️
                                 </Button>
                             </div>
