@@ -53,19 +53,15 @@ const Header = () => {
             </span>
           </nav>
 
-          {/* Actions */}
-          <div className="flex items-center gap-3 absolute right-4 top-1/2 -translate-y-1/2 md:static md:translate-y-0">
-            {/* Cart is always visible for easy access */}
-            <CartSidebar />
-
-            {/* Consolidated Menu */}
+          {/* Menu - Left Side */}
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 md:hidden">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full bg-secondary/50 hover:bg-secondary">
                   <Menu className="h-5 w-5 text-foreground" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64 rounded-[2rem] border-2 border-primary/20 bg-background/95 backdrop-blur-md shadow-xl p-3">
+              <DropdownMenuContent align="start" className="w-64 rounded-[2rem] border-2 border-primary/20 bg-background/95 backdrop-blur-md shadow-xl p-3">
                 <DropdownMenuLabel className="text-center text-lg font-bold text-primary flex items-center justify-center gap-2 py-2">
                   <span>✨</span> {t('menu')} <span>✨</span>
                 </DropdownMenuLabel>
@@ -157,6 +153,12 @@ const Header = () => {
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
+          </div>
+
+          {/* Actions - Right Side */}
+          <div className="flex items-center gap-3 absolute right-4 top-1/2 -translate-y-1/2 md:static md:translate-y-0">
+            {/* Cart is always visible for easy access */}
+            <CartSidebar />
           </div>
         </div>
       </div>

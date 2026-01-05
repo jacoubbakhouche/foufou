@@ -10,6 +10,7 @@ export interface UseProductsOptions {
   sortBy?: 'newest' | 'price-asc' | 'price-desc' | 'default';
   isNew?: boolean;
   isSale?: boolean;
+  keepPreviousData?: boolean;
 }
 
 export const useProducts = ({
@@ -19,7 +20,8 @@ export const useProducts = ({
   search = '',
   sortBy = 'newest',
   isNew = false,
-  isSale = false
+  isSale = false,
+  keepPreviousData = false
 }: UseProductsOptions = {}) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -103,10 +105,10 @@ export const useProducts = ({
         isNew: new Date(p.created_at) > new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
       }));
 
-      if (page === 1) {
-        setProducts(formattedProducts);
-      } else {
+      if (keepPreviousData && page > 1) {
         setProducts(prev => [...prev, ...formattedProducts]);
+      } else {
+        setProducts(formattedProducts);
       }
 
       setTotalCount(count || 0);
