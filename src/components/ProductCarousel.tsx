@@ -18,9 +18,6 @@ const ProductCarousel = ({ products }: ProductCarouselProps) => {
         loop: true,
         dragFree: true,
         skipSnaps: true,
-        inViewThreshold: 0.7,
-        friction: 0.68, // Standard friction for natural feel
-        dragThreshold: 10, // Standard threshold
     });
 
     const scrollPrev = useCallback(() => {
