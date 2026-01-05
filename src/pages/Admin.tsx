@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { PushNotifications } from '@capacitor/push-notifications';
+import { Capacitor } from '@capacitor/core';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -92,8 +94,45 @@ const Admin = () => {
     if (isAdmin) {
       fetchProducts();
       fetchOrders();
+
+      // Register for Push Notifications ONLY when in Admin
+      // TEMPORARILY DISABLED FOR WEB DEVELOPMENT
+      /*
+      if (Capacitor.isNativePlatform()) {
+        const registerPush = async () => {
+          try {
+            const { PushNotifications } = await import('@capacitor/push-notifications');
+
+            let permStatus = await PushNotifications.checkPermissions();
+            if (permStatus.receive === 'prompt') {
+              permStatus = await PushNotifications.requestPermissions();
+            }
+            if (permStatus.receive === 'granted') {
+              await PushNotifications.register();
+              PushNotifications.addListener('registration', async (token) => {
+                if (user) {
+                  try {
+                    await supabase.from('fcm_tokens').upsert({
+                      user_id: user.id,
+                      token: token.value,
+                      device_type: Capacitor.getPlatform(),
+                      updated_at: new Date().toISOString()
+                    }, { onConflict: 'user_id, token' });
+                  } catch (err) {
+                    console.error("Token save error", err);
+                  }
+                }
+              });
+            }
+          } catch (err) {
+            console.error("Push Notifications plugin not found or failed to load", err);
+          }
+        };
+        registerPush().catch(console.error);
+      }
+      */
     }
-  }, [isAdmin]);
+  }, [isAdmin, user]);
 
   const fetchProducts = async () => {
     const { data, error } = await supabase

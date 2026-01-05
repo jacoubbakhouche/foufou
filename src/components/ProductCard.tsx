@@ -65,7 +65,7 @@ const ProductCard = ({ product, compact = false }: ProductCardProps) => {
   return (
     <div
       className={cn(
-        "group bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-card transition-all duration-500 animate-fade-up border border-transparent hover:border-gold/20 flex flex-col h-full",
+        "group bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 border border-transparent hover:border-gold/20 flex flex-col h-full",
         compact ? "w-full" : ""
       )}
     >
@@ -77,7 +77,7 @@ const ProductCard = ({ product, compact = false }: ProductCardProps) => {
             alt={product.name}
             className={cn(
               "absolute inset-0 w-full h-full object-cover transition-opacity duration-700",
-              index === currentImageIndex ? "opacity-100 scale-100" : "opacity-0 scale-105"
+              index === currentImageIndex ? "opacity-100" : "opacity-0"
             )}
           />
         ))}
@@ -104,7 +104,7 @@ const ProductCard = ({ product, compact = false }: ProductCardProps) => {
           ) : (
             <span className="bg-white/95 backdrop-blur text-black text-[10px] font-bold px-2 py-0.5 rounded shadow-md animate-scale-in flex items-center gap-1 border border-black/5">
               <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-              <span className="text-black">{product.stock_quantity > 10 ? '+10' : product.stock_quantity} {t('pieces')}</span>
+              <span className="text-black">{product.stock_quantity} {t('pieces')}</span>
             </span>
           )}
         </div>

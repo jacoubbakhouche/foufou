@@ -127,9 +127,11 @@ const OrderModal = ({ product, selectedColor, selectedSize, isOpen, onClose }: O
 
         // Stock deduction is now handled by DB Trigger on order insert
 
-        const { error } = await supabase
+        const { data: orderResult, error } = await supabase
             .from('orders')
-            .insert([orderData]);
+            .insert([orderData])
+            .select()
+            .single();
 
         setLoading(false);
         if (error) {
@@ -137,6 +139,22 @@ const OrderModal = ({ product, selectedColor, selectedSize, isOpen, onClose }: O
         } else {
             toast.success('تم إرسال طلبك بنجاح! سنتواصل معك قريباً');
             onClose();
+
+            // Trigger Admin Notification
+            if (orderResult) {
+                try {
+                    await supabase.functions.invoke('send-order-notification', {
+                        body: {
+                            orderId: orderResult.id,
+                            customerName: formData.name,
+                            total: total
+                        }
+                    });
+                } catch (notifyError) {
+                    console.error("Failed to send notification:", notifyError);
+                    // Don't show error to user, as order was successful
+                }
+            }
         }
     };
 
