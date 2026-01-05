@@ -24,6 +24,7 @@ const Auth = () => {
     try {
       if (isLogin) {
         await signIn(email, password);
+        // Direct redirect to Home
         navigate('/');
       } else {
         await signUp(email, password);

@@ -17,8 +17,11 @@ const ProductCarousel = ({ products }: ProductCarouselProps) => {
         slidesToScroll: 'auto',
         containScroll: 'trimSnaps',
         loop: true,
-        loop: true,
         dragFree: true,
+        skipSnaps: true,
+        inViewThreshold: 0.7,
+        friction: 0.15, // Extremely low friction for "light" manual swipe
+        dragThreshold: 8, // Require slightly more movement to start drag (scrolling vs wiping)
     });
 
     const scrollPrev = useCallback(() => {

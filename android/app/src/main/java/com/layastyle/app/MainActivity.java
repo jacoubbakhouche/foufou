@@ -1,4 +1,4 @@
-package com.foufou.app;
+package com.layastyle.app;
 
 import com.getcapacitor.BridgeActivity;
 
