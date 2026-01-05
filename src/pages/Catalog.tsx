@@ -15,9 +15,17 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-interface CatalogProps {
-    mode?: 'default' | 'new' | 'sale';
-}
+import {
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from "@/components/ui/pagination";
+
+// ... existing imports
 
 const Catalog = ({ mode = 'default' }: CatalogProps) => {
     const { t } = useLanguage();
@@ -27,19 +35,22 @@ const Catalog = ({ mode = 'default' }: CatalogProps) => {
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
     const [sortBy, setSortBy] = useState<'newest' | 'price-asc' | 'price-desc'>('newest');
     const [page, setPage] = useState(1);
+    const ITEMS_PER_PAGE = 8;
 
     // Fetch Data Server-Side
-    const { products, loading, hasMore } = useProducts({
+    const { products, loading, totalCount } = useProducts({
         page,
-        limit: 20,
+        limit: ITEMS_PER_PAGE,
         category: selectedCategory === 'الكل' ? null : selectedCategory,
         search: searchQuery,
         sortBy: sortBy as any,
         isNew: mode === 'new',
-        isSale: mode === 'sale'
+        isSale: mode === 'sale',
+        keepPreviousData: false // Replace data, don't append
     });
 
     const categories = useCategories();
+    const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
     // Reset Page on Filter Change
     const handleFilterChange = (updater: any) => {
@@ -47,7 +58,7 @@ const Catalog = ({ mode = 'default' }: CatalogProps) => {
         setPage(1);
     };
 
-    // Dynamic Title & Description
+    // ... getPageDetails ... same logic
     const getPageDetails = () => {
         switch (mode) {
             case 'new':
@@ -67,7 +78,6 @@ const Catalog = ({ mode = 'default' }: CatalogProps) => {
                 };
         }
     };
-
     const { title, description } = getPageDetails();
 
     return (
@@ -75,7 +85,11 @@ const Catalog = ({ mode = 'default' }: CatalogProps) => {
             <Header />
 
             <main className="flex-1 container mx-auto px-4 py-8">
-                {/* Page Header */}
+                {/* Page Header and Toolbar same as before ... */}
+
+                {/* Copied from existing file to keep context if needed, but since I am replacing logic, I will restart the return block for clarity in the tool call if I could, but I must match exact lines. */}
+                {/* Since the file is huge and I'm changing the middle/end mostly. */}
+
                 <div className="mb-8 space-y-4">
                     <h1 className="text-3xl md:text-4xl font-black text-center md:text-start">
                         {title}
@@ -157,18 +171,49 @@ const Catalog = ({ mode = 'default' }: CatalogProps) => {
                                         <ProductCard key={product.id} product={product} compact />
                                     ))}
                                 </div>
-                                {hasMore && (
-                                    <div className="mt-8 text-center">
-                                        <Button
-                                            onClick={() => setPage(prev => prev + 1)}
-                                            disabled={loading}
-                                            variant="outline"
-                                            className="rounded-full px-8"
-                                        >
-                                            {loading ? <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" /> : t('loadMore', 'تحميل المزيد')}
-                                        </Button>
-                                    </div>
-                                )}
+
+                                {/* Pagination Controls */}
+                                <div className="mt-12">
+                                    <Pagination>
+                                        <PaginationContent>
+                                            <PaginationItem>
+                                                <PaginationPrevious
+                                                    onClick={() => setPage(prev => Math.max(prev - 1, 1))}
+                                                    className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                                                />
+                                            </PaginationItem>
+
+                                            {[...Array(totalPages)].map((_, i) => {
+                                                const p = i + 1;
+                                                // Simple logic: show all for now, or truncate if many pages.
+                                                // For 1M products we need smart truncation (1, 2, 3 ... 10).
+                                                // But for simplicity let's just show current window or max 5 pages.
+                                                if (Math.abs(page - p) > 2 && p !== 1 && p !== totalPages) {
+                                                    if (Math.abs(page - p) === 3) return <PaginationItem key={p}><PaginationEllipsis /></PaginationItem>;
+                                                    return null;
+                                                }
+                                                return (
+                                                    <PaginationItem key={p}>
+                                                        <PaginationLink
+                                                            isActive={page === p}
+                                                            onClick={() => setPage(p)}
+                                                            className="cursor-pointer"
+                                                        >
+                                                            {p}
+                                                        </PaginationLink>
+                                                    </PaginationItem>
+                                                );
+                                            })}
+
+                                            <PaginationItem>
+                                                <PaginationNext
+                                                    onClick={() => setPage(prev => Math.min(prev + 1, totalPages))}
+                                                    className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                                                />
+                                            </PaginationItem>
+                                        </PaginationContent>
+                                    </Pagination>
+                                </div>
                             </>
                         ) : (
                             <div className="text-center py-20 bg-secondary/20 rounded-3xl border border-dashed border-secondary">
