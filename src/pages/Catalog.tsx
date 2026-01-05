@@ -21,8 +21,31 @@ interface CatalogProps {
 
 const Catalog = ({ mode = 'default' }: CatalogProps) => {
     const { t } = useLanguage();
-    const { products, loading } = useProducts();
-    const allCategories = useCategories(products);
+
+    // State
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    const [sortBy, setSortBy] = useState<'newest' | 'price-asc' | 'price-desc'>('newest');
+    const [page, setPage] = useState(1);
+
+    // Fetch Data Server-Side
+    const { products, loading, hasMore } = useProducts({
+        page,
+        limit: 20,
+        category: selectedCategory === 'الكل' ? null : selectedCategory,
+        search: searchQuery,
+        sortBy: sortBy as any,
+        isNew: mode === 'new',
+        isSale: mode === 'sale'
+    });
+
+    const categories = useCategories();
+
+    // Reset Page on Filter Change
+    const handleFilterChange = (updater: any) => {
+        updater();
+        setPage(1);
+    };
 
     // Dynamic Title & Description
     const getPageDetails = () => {
@@ -47,56 +70,6 @@ const Catalog = ({ mode = 'default' }: CatalogProps) => {
 
     const { title, description } = getPageDetails();
 
-    // State
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-    const [sortBy, setSortBy] = useState<'newest' | 'price-asc' | 'price-desc'>('newest');
-    const [isFilterOpen, setIsFilterOpen] = useState(false);
-
-    // Filter and Sort Logic
-    const filteredProducts = useMemo(() => {
-        let result = [...products];
-
-        // Mode Pre-filtering
-        if (mode === 'new') {
-            result = result.filter(p => p.isNew);
-        } else if (mode === 'sale') {
-            result = result.filter(p => p.originalPrice && p.originalPrice > p.price);
-        }
-
-        // Filter by Category
-        if (selectedCategory && selectedCategory !== 'الكل') {
-            result = result.filter(p => p.category === selectedCategory);
-        }
-
-        // Filter by Search
-        if (searchQuery) {
-            const query = searchQuery.toLowerCase();
-            result = result.filter(p =>
-                p.name.toLowerCase().includes(query) ||
-                p.category?.toLowerCase().includes(query) ||
-                p.description?.toLowerCase().includes(query)
-            );
-        }
-
-        // Sort
-        switch (sortBy) {
-            case 'price-asc':
-                result.sort((a, b) => a.price - b.price);
-                break;
-            case 'price-desc':
-                result.sort((a, b) => b.price - a.price);
-                break;
-            case 'newest':
-            default:
-                break;
-        }
-
-        return result;
-    }, [products, selectedCategory, searchQuery, sortBy, mode]);
-
-    const categories = ['الكل', ...allCategories.filter(c => c !== 'الكل')];
-
     return (
         <div className="min-h-screen bg-background flex flex-col">
             <Header />
@@ -120,7 +93,7 @@ const Catalog = ({ mode = 'default' }: CatalogProps) => {
                             placeholder={t('searchPlaceholder', 'ابحث عن منتج...')}
                             className="pr-10 rounded-full bg-secondary/20 border-border/50 focus:bg-background transition-colors"
                             value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onChange={(e) => handleFilterChange(() => setSearchQuery(e.target.value))}
                         />
                     </div>
 
@@ -134,13 +107,13 @@ const Catalog = ({ mode = 'default' }: CatalogProps) => {
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => setSortBy('newest')}>
+                                <DropdownMenuItem onClick={() => handleFilterChange(() => setSortBy('newest'))}>
                                     {t('newest', 'وصل حديثاً')}
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setSortBy('price-asc')}>
+                                <DropdownMenuItem onClick={() => handleFilterChange(() => setSortBy('price-asc'))}>
                                     {t('priceLowHigh', 'السعر: من الأقل للأعلى')}
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => setSortBy('price-desc')}>
+                                <DropdownMenuItem onClick={() => handleFilterChange(() => setSortBy('price-desc'))}>
                                     {t('priceHighLow', 'السعر: من الأعلى للأقل')}
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -155,7 +128,7 @@ const Catalog = ({ mode = 'default' }: CatalogProps) => {
                             {categories.map((category) => (
                                 <button
                                     key={category}
-                                    onClick={() => setSelectedCategory(category === 'الكل' ? null : category)}
+                                    onClick={() => handleFilterChange(() => setSelectedCategory(category === 'الكل' ? null : category))}
                                     className={cn(
                                         "px-6 py-3 rounded-full transition-all text-sm font-bold whitespace-nowrap shadow-sm border",
                                         (selectedCategory === category || (category === 'الكل' && !selectedCategory))
@@ -171,18 +144,32 @@ const Catalog = ({ mode = 'default' }: CatalogProps) => {
 
                     {/* Product Grid */}
                     <div className="flex-1">
-                        {loading ? (
+                        {loading && products.length === 0 ? (
                             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
                                 {[...Array(8)].map((_, i) => (
                                     <div key={i} className="aspect-[4/5] bg-secondary animate-pulse rounded-2xl" />
                                 ))}
                             </div>
-                        ) : filteredProducts.length > 0 ? (
-                            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-                                {filteredProducts.map((product) => (
-                                    <ProductCard key={product.id} product={product} compact />
-                                ))}
-                            </div>
+                        ) : products.length > 0 ? (
+                            <>
+                                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+                                    {products.map((product) => (
+                                        <ProductCard key={product.id} product={product} compact />
+                                    ))}
+                                </div>
+                                {hasMore && (
+                                    <div className="mt-8 text-center">
+                                        <Button
+                                            onClick={() => setPage(prev => prev + 1)}
+                                            disabled={loading}
+                                            variant="outline"
+                                            className="rounded-full px-8"
+                                        >
+                                            {loading ? <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin" /> : t('loadMore', 'تحميل المزيد')}
+                                        </Button>
+                                    </div>
+                                )}
+                            </>
                         ) : (
                             <div className="text-center py-20 bg-secondary/20 rounded-3xl border border-dashed border-secondary">
                                 <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-background shadow-sm mb-4">
@@ -196,6 +183,7 @@ const Catalog = ({ mode = 'default' }: CatalogProps) => {
                                     onClick={() => {
                                         setSearchQuery('');
                                         setSelectedCategory(null);
+                                        setPage(1);
                                     }}
                                 >
                                     {t('clearFilters', 'مسح التصفية')}
