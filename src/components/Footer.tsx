@@ -12,7 +12,7 @@ const Footer = () => {
           <div>
             <div className="flex items-center gap-2 mb-4">
               <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary via-primary/80 to-primary/60">
-                foufou torino
+                layastyle23
               </span>
             </div>
             <p className="text-muted-foreground text-sm leading-relaxed">
@@ -46,11 +46,11 @@ const Footer = () => {
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-primary" />
-                <span>contact@foufoutorino.dz</span>
+                <span>contact@layastyle23.dz</span>
               </li>
               <li className="flex items-center gap-2">
                 <MapPin className="h-4 w-4 text-primary" />
-                <span>{t('wilaya')}</span>
+                <span>{t('annaba')}</span>
               </li>
             </ul>
 
@@ -78,7 +78,7 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-border mt-8 pt-8 text-center text-muted-foreground text-sm">
-          <p>&copy; {new Date().getFullYear()} foufou torino. {t('rightsReserved')}</p>
+          <p>&copy; {new Date().getFullYear()} layastyle23. {t('rightsReserved')}</p>
         </div>
       </div>
     </footer>
