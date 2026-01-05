@@ -164,20 +164,12 @@ const StoreOrganization = () => {
 
     return (
         <div className="container mx-auto p-4 md:p-8 space-y-8 animate-fade-up">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-3xl font-bold bg-gradient-gold bg-clip-text text-transparent">
-                        Organisation du Magasin
-                    </h1>
-                    <p className="text-muted-foreground mt-2">
-                        Gérez le contenu de la page d'accueil (Hero Section)
-                    </p>
-                </div>
-                <div className="flex gap-4">
-                    <Button variant="outline" onClick={() => navigate('/admin')}>
+            <div className="flex flex-col md:flex-row items-center justify-end gap-4">
+                <div className="flex gap-4 w-full md:w-auto">
+                    <Button variant="outline" onClick={() => navigate('/admin')} className="flex-1 md:flex-none">
                         Retour
                     </Button>
-                    <Button onClick={handleSave} disabled={loading} className="bg-primary hover:bg-primary/90">
+                    <Button onClick={handleSave} disabled={loading} className="bg-primary hover:bg-primary/90 flex-1 md:flex-none">
                         <Save className="mr-2 h-4 w-4" />
                         Sauvegarder
                     </Button>
