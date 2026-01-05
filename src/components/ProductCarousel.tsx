@@ -1,6 +1,5 @@
 import React, { useCallback } from 'react';
 import useEmblaCarousel from 'embla-carousel-react';
-import Autoplay from 'embla-carousel-autoplay';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Product } from '@/types';
 import ProductCard from './ProductCard';
@@ -20,8 +19,8 @@ const ProductCarousel = ({ products }: ProductCarouselProps) => {
         dragFree: true,
         skipSnaps: true,
         inViewThreshold: 0.7,
-        friction: 0.15, // Extremely low friction for "light" manual swipe
-        dragThreshold: 8, // Require slightly more movement to start drag (scrolling vs wiping)
+        friction: 0.68, // Standard friction for natural feel
+        dragThreshold: 10, // Standard threshold
     });
 
     const scrollPrev = useCallback(() => {

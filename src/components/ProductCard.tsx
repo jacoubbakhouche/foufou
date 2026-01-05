@@ -36,7 +36,7 @@ const ProductCard = ({ product, compact = false }: ProductCardProps) => {
 
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % images.length);
-    }, 3000);
+    }, 3000); // Restored smooth auto-rotation (3s)
 
     return () => clearInterval(interval);
   }, [images.length]);
@@ -68,6 +68,8 @@ const ProductCard = ({ product, compact = false }: ProductCardProps) => {
         "group bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 border border-transparent hover:border-gold/20 flex flex-col h-full",
         compact ? "w-full" : ""
       )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <Link to={`/product/${product.id}`} className="block relative aspect-[4/5] overflow-hidden bg-cream-dark flex-shrink-0">
         {images.map((img, index) => (
