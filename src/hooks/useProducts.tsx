@@ -20,20 +20,29 @@ export const useProducts = () => {
 
       if (error) throw error;
 
-      const formattedProducts: Product[] = (data || []).map((p: any) => ({
-        id: p.id,
-        name: p.name,
-        price: Number(p.price),
-        originalPrice: p.original_price ? Number(p.original_price) : undefined,
-        images: p.images || (p.image ? [p.image] : []),
-        video_url: p.video_url,
-        category: p.category,
-        colors: p.colors || [],
-        sizes: p.sizes || [],
-        description: p.description || '',
-        inStock: p.in_stock,
-        stock_quantity: p.stock_quantity || 0,
-      }));
+      const formattedProducts: Product[] = (data || []).map((p: any) => {
+        // Calculate isNew based on created_at (e.g., last 14 days)
+        const createdAt = new Date(p.created_at);
+        const fourteenDaysAgo = new Date();
+        fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 4);
+        const isNew = createdAt > fourteenDaysAgo;
+
+        return {
+          id: p.id,
+          name: p.name,
+          price: Number(p.price),
+          originalPrice: p.original_price ? Number(p.original_price) : undefined,
+          images: p.images || (p.image ? [p.image] : []),
+          video_url: p.video_url,
+          category: p.category,
+          colors: p.colors || [],
+          sizes: p.sizes || [],
+          description: p.description || '',
+          inStock: p.in_stock,
+          stock_quantity: p.stock_quantity || 0,
+          isNew: isNew,
+        };
+      });
 
       setProducts(formattedProducts);
     } catch (err) {

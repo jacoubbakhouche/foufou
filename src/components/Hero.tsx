@@ -100,7 +100,7 @@ const Hero = () => {
                 variant="outline"
                 size="lg"
                 className="h-14 px-10 text-lg rounded-full border-2 border-gold text-foreground hover:bg-gold/10 w-full sm:w-auto bg-transparent font-bold"
-                onClick={() => navigate('/products')}
+                onClick={() => navigate('/catalog')}
               >
                 {t('browseCollections', 'تصفح المجموعات')}
               </Button>

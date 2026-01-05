@@ -186,10 +186,10 @@ const StoreOrganization = () => {
 
             {settings ? (
                 <Tabs defaultValue="fr" className="space-y-6">
-                    <TabsList className="bg-card w-full justify-start p-1 h-auto">
-                        <TabsTrigger value="fr" className="flex-1">Français (FR)</TabsTrigger>
-                        <TabsTrigger value="ar" className="flex-1">العربية (AR)</TabsTrigger>
-                        <TabsTrigger value="images" className="flex-1">Images Slider</TabsTrigger>
+                    <TabsList className="bg-card w-full h-auto grid grid-cols-1 sm:grid-cols-3 p-1 gap-2">
+                        <TabsTrigger value="fr" className="w-full">Français (FR)</TabsTrigger>
+                        <TabsTrigger value="ar" className="w-full">العربية (AR)</TabsTrigger>
+                        <TabsTrigger value="images" className="w-full">Images Slider</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="fr" className="space-y-4">
