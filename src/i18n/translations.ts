@@ -44,7 +44,7 @@ export const translations = {
         // Products
         newArrivals: 'Nouvelles Arrivées',
         bestSellers: 'Meilleures Ventes',
-        addToCart: 'Ajouter au panier',
+        addToCart: 'Ajouter', // Shortened from "Ajouter au panier" for UI space
         outOfStock: 'Rupture de stock',
         price: 'DA',
 
@@ -74,7 +74,7 @@ export const translations = {
         orderSuccessMessage: 'Notre équipe vous contactera sous peu pour confirmer.',
         backToStore: 'Retour à la boutique',
         autoFill: 'Informations remplies automatiquement depuis votre profil',
-        buyNow: 'Acheter maintenant',
+        buyNow: 'Acheter', // Shortened from "Acheter maintenant" for UI space
         fullNamePlaceholder: 'Entrez votre nom complet',
         phonePlaceholder: '05xxxxxxxx',
         selectWilaya: 'Sélectionner la Wilaya',
