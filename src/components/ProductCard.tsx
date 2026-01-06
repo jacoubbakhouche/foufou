@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Product } from '@/types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { ShoppingBag } from 'lucide-react';
+import { ShoppingBag, Flame } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 import { toast } from 'sonner';
 import { useLanguage } from '@/context/LanguageContext';
@@ -90,12 +90,8 @@ const ProductCard = ({ product, compact = false }: ProductCardProps) => {
         <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
         {/* Badges */}
+        {/* Badges: Left Side (Discount & Stock) */}
         <div className="absolute top-3 start-3 flex flex-col gap-2 z-10">
-          {product.isNew && (
-            <span className="bg-primary text-primary-foreground text-[10px] font-extrabold px-3 py-1 rounded-full shadow-gold animate-pulse border border-gold/50 tracking-wider">
-              {t('new')}
-            </span>
-          )}
           {discountPercentage > 0 && (
             <span className="bg-destructive text-white text-[10px] font-bold px-1.5 py-0.5 rounded shadow-[0_0_8px_rgba(239,68,68,0.6)] animate-scale-in">
               -{discountPercentage}%
@@ -110,6 +106,18 @@ const ProductCard = ({ product, compact = false }: ProductCardProps) => {
               <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
               <span className="text-black dark:text-white">{product.stock_quantity} {t('pieces')}</span>
             </span>
+          )}
+        </div>
+
+        {/* Badges: Right Side (NOW Flame) */}
+        <div className="absolute top-3 end-3 flex flex-col gap-2 z-10">
+          {product.isNew && (
+            <div className="relative flex items-center justify-center w-8 h-8 drop-shadow-md animate-pulse">
+              <Flame className="w-full h-full text-red-600 fill-red-600" />
+              <span className="absolute text-[8px] font-bold text-white top-[55%] left-1/2 -translate-x-1/2 -translate-y-1/2">
+                NOW
+              </span>
+            </div>
           )}
         </div>
 

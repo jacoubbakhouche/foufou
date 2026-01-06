@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useProducts, useCategories } from '@/hooks/useProducts';
 import ProductCard from '@/components/ProductCard';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const ProductGrid = () => {
   const navigate = useNavigate();
@@ -46,7 +47,7 @@ const ProductGrid = () => {
         </div>
 
         {/* Categories Filter */}
-        <div id="categories" className="flex overflow-x-auto pb-4 gap-3 px-4 no-scrollbar items-center justify-start md:justify-center touch-pan-x snap-x">
+        <div id="categories" className="flex overflow-x-auto pb-4 gap-3 px-4 no-scrollbar items-center justify-start touch-pan-x snap-x">
           {categories.map((category) => (
             <button
               key={category}
@@ -55,7 +56,7 @@ const ProductGrid = () => {
                 'px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 shrink-0 whitespace-nowrap snap-center border-2 shadow-sm',
                 selectedCategory === category || (category === 'الكل' && !selectedCategory)
                   ? 'bg-gradient-gold text-black border-gold shadow-gold scale-105'
-                  : 'bg-secondary/50 text-foreground hover:bg-secondary border-border hover:border-gold/50'
+                  : 'bg-secondary text-foreground hover:bg-secondary/80 border-primary/20 hover:border-gold/50'
               )}
             >
               {category}
@@ -65,8 +66,16 @@ const ProductGrid = () => {
 
         {/* Product Carousels */}
         {loading && products.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5 md:gap-6 mt-8 -mx-2 px-1 md:mx-0 md:px-4">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="flex flex-col gap-3">
+                <Skeleton className="w-full aspect-[4/5] rounded-2xl" />
+                <div className="px-1 space-y-2">
+                  <Skeleton className="h-4 w-3/4 bg-gray-200 dark:bg-gray-800" />
+                  <Skeleton className="h-4 w-1/2 bg-gray-200 dark:bg-gray-800" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5 md:gap-6 mt-8 -mx-2 px-1 md:mx-0 md:px-4">
