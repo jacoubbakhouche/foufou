@@ -15,10 +15,10 @@ const ProductCarousel = ({ products }: ProductCarouselProps) => {
         direction: 'rtl',
         slidesToScroll: 'auto',
         containScroll: 'trimSnaps',
-        loop: true,
+        loop: false, // User requested to stop looping
         dragFree: true,
         skipSnaps: true,
-        dragThreshold: 3, // Ultra responsive for mobile to fix "not moving" feel
+        dragThreshold: 3,
     });
 
     const scrollPrev = useCallback(() => {

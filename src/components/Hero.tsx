@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowDown, ArrowRight } from 'lucide-react';
+import { ArrowDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
@@ -109,22 +109,22 @@ const Hero = () => {
             {/* Features / Stats */}
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-8 animate-fade-up" style={{ animationDelay: '0.4s' }}>
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-full bg-gold/10 text-gold-dark dark:text-gold-light">
-                  <ArrowRight className="h-5 w-5" />
+                <div className="h-10 w-10 flex items-center justify-center rounded-full bg-gold/10 text-xl shadow-sm border border-gold/10">
+                  🚚
                 </div>
-                <span className="text-sm font-medium text-muted-foreground">{t('fastDelivery', 'توصيل سريع')}</span>
+                <span className="text-sm font-bold text-muted-foreground">{t('fastDelivery', 'توصيل سريع')}</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-full bg-gold/10 text-gold-dark dark:text-gold-light">
-                  <ArrowRight className="h-5 w-5" />
+                <div className="h-10 w-10 flex items-center justify-center rounded-full bg-gold/10 text-xl shadow-sm border border-gold/10">
+                  ✨
                 </div>
-                <span className="text-sm font-medium text-muted-foreground">{t('latestModels', 'أحدث الموديلات')}</span>
+                <span className="text-sm font-bold text-muted-foreground">{t('latestModels', 'أحدث الموديلات')}</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="p-2 rounded-full bg-gold/10 text-gold-dark dark:text-gold-light">
-                  <ArrowRight className="h-5 w-5" />
+                <div className="h-10 w-10 flex items-center justify-center rounded-full bg-gold/10 text-xl shadow-sm border border-gold/10">
+                  💎
                 </div>
-                <span className="text-sm font-medium text-muted-foreground">{t('highQuality', 'جودة عالية')}</span>
+                <span className="text-sm font-bold text-muted-foreground">{t('highQuality', 'جودة عالية')}</span>
               </div>
             </div>
           </div>
