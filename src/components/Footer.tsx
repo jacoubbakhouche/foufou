@@ -56,7 +56,7 @@ const Footer = () => {
 
             <div className="flex gap-4 mt-6">
               <a
-                href="#"
+                href="https://www.facebook.com/share/v/1N6Mecivrj/"
                 target="_blank"
                 rel="noreferrer"
                 className="bg-secondary p-2 rounded-full hover:bg-primary hover:text-white dark:hover:text-black transition-all duration-300 text-foreground"
@@ -65,13 +65,32 @@ const Footer = () => {
                 <Facebook className="h-5 w-5" />
               </a>
               <a
-                href="#"
+                href="https://www.instagram.com/laya_style.23/?utm_source=ig_web_button_share_sheet"
                 target="_blank"
                 rel="noreferrer"
                 className="bg-secondary p-2 rounded-full hover:bg-primary hover:text-white dark:hover:text-black transition-all duration-300 text-foreground"
                 aria-label="Instagram"
               >
                 <Instagram className="h-5 w-5" />
+              </a>
+              <a
+                href="https://www.tiktok.com/@laya.style.23"
+                target="_blank"
+                rel="noreferrer"
+                className="bg-secondary p-2 rounded-full hover:bg-primary hover:text-white dark:hover:text-black transition-all duration-300 text-foreground"
+                aria-label="TikTok"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-5 w-5"
+                >
+                  <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+                </svg>
               </a>
             </div>
           </div>
