@@ -24,24 +24,24 @@ const ProductDetail = () => {
     const [selectedColor, setSelectedColor] = useState('');
     const [selectedSize, setSelectedSize] = useState('');
     const [isZoomOpen, setIsZoomOpen] = useState(false);
-    const [touchStart, setTouchStart] = useState<number | null>(null);
-    const [touchEnd, setTouchEnd] = useState<number | null>(null);
+    const touchStart = React.useRef<number | null>(null);
+    const touchEnd = React.useRef<number | null>(null);
 
     // Lightbox Navigation
     const minSwipeDistance = 50;
 
     const onTouchStart = (e: React.TouchEvent) => {
-        setTouchEnd(null);
-        setTouchStart(e.targetTouches[0].clientX);
+        touchEnd.current = null;
+        touchStart.current = e.targetTouches[0].clientX;
     };
 
     const onTouchMove = (e: React.TouchEvent) => {
-        setTouchEnd(e.targetTouches[0].clientX);
+        touchEnd.current = e.targetTouches[0].clientX;
     };
 
     const onTouchEnd = () => {
-        if (!touchStart || !touchEnd) return;
-        const distance = touchStart - touchEnd;
+        if (!touchStart.current || !touchEnd.current) return;
+        const distance = touchStart.current - touchEnd.current;
         const isLeftSwipe = distance > minSwipeDistance;
         const isRightSwipe = distance < -minSwipeDistance;
 
@@ -414,19 +414,19 @@ const ProductDetail = () => {
                             {/* Quantity */}
                             <div>
                                 <h3 className="text-lg font-bold mb-3">الكمية</h3>
-                                <div className="flex items-center gap-4 bg-background rounded-xl border p-1 shadow-sm w-fit">
+                                <div className="flex items-center gap-4 bg-secondary/50 rounded-xl border p-1 shadow-sm w-fit">
                                     <button
                                         type="button"
                                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                        className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-secondary transition-colors text-xl font-bold"
+                                        className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-background transition-colors text-xl font-bold bg-background/50 shadow-sm"
                                     >
                                         -
                                     </button>
-                                    <span className="text-xl font-bold min-w-[30px] text-center">{quantity}</span>
+                                    <span className="text-xl font-bold min-w-[30px] text-center text-foreground">{quantity}</span>
                                     <button
                                         type="button"
                                         onClick={() => setQuantity(quantity + 1)}
-                                        className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-secondary transition-colors text-xl font-bold text-primary"
+                                        className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-background transition-colors text-xl font-bold text-primary bg-background/50 shadow-sm"
                                     >
                                         +
                                     </button>

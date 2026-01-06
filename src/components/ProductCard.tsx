@@ -31,15 +31,17 @@ const ProductCard = ({ product, compact = false }: ProductCardProps) => {
     ? product.images
     : (product.image ? [product.image] : []);
 
+  const [isHovered, setIsHovered] = useState(false);
+
   useEffect(() => {
-    if (images.length <= 1) return;
+    if (images.length <= 1 || !isHovered) return;
 
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % images.length);
-    }, 3000); // Restored smooth auto-rotation (3s)
+    }, 1500); // Faster rotation on hover (1.5s)
 
     return () => clearInterval(interval);
-  }, [images.length]);
+  }, [images.length, isHovered]);
 
   const discountPercentage = product.originalPrice
     ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
