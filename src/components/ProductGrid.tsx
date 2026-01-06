@@ -28,12 +28,9 @@ const ProductGrid = () => {
     }
   };
 
-  const chunkProducts = (arr: any[], size: number) => {
-    return Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
-      arr.slice(i * size, i * size + size)
-    );
-  };
-  const productGroups = chunkProducts(products, 4); // Group by 4 items per carousel
+  // Removed chunking logic to display a single unified carousel
+  // const chunkProducts = ... 
+  // const productGroups = ...
 
   return (
     <section id="products" className="py-16 md:py-24 bg-background overflow-hidden">
@@ -72,21 +69,8 @@ const ProductGrid = () => {
             <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
           </div>
         ) : (
-          <div className="space-y-16 mt-8">
-            {productGroups.map((group, index) => (
-              <div key={index} className="relative">
-                {productGroups.length > 1 && (
-                  <div className="flex items-center gap-4 mb-6 px-4">
-                    <div className="h-px bg-border flex-1" />
-                    <span className="text-sm font-bold text-muted-foreground whitespace-nowrap px-4 py-1 bg-secondary rounded-full">
-                      {index + 1}
-                    </span>
-                    <div className="h-px bg-border flex-1" />
-                  </div>
-                )}
-                <ProductCarousel products={group} />
-              </div>
-            ))}
+          <div className="mt-8 px-4">
+            <ProductCarousel products={products} />
           </div>
         )}
 

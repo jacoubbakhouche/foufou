@@ -109,7 +109,7 @@ const Catalog = ({ mode = 'default' }: CatalogProps) => {
                 </div>
 
                 {/* Toolbar (Search & Sort & Categories) */}
-                <div className="sticky top-20 md:top-24 z-30 bg-background/95 backdrop-blur transition-all pb-2">
+                <div className="pb-2">
                     <div className="flex flex-col md:flex-row gap-4 mb-4 py-4 border-b">
                         <div className="relative flex-1">
                             <Search className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
