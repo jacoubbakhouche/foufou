@@ -13,16 +13,7 @@ const CartSidebar = () => {
 
     const handleCheckout = () => {
         setIsOpen(false);
-
-        if (items.length === 1) {
-            const item = items[0];
-            const params = new URLSearchParams({
-                scrollToOrder: 'true'
-            });
-            navigate(`/product/${item.product.id}?${params.toString()}`);
-        } else {
-            navigate('/checkout');
-        }
+        navigate('/checkout');
     };
 
     return (

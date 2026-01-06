@@ -1,409 +1,428 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import React, { useState, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
-import { cn } from '@/lib/utils';
-import { supabase } from '@/integrations/supabase/client';
-import { useLanguage } from '@/context/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowRight, CheckCircle2, Phone, User, MapPin } from 'lucide-react';
+import { Label } from '@/components/ui/label';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowLeft, CheckCircle2, User, Phone, MapPin, ShoppingBag, Truck, Trash2 } from 'lucide-react';
+import Header from '@/components/Header';
 import { toast } from 'sonner';
-import { ALGERIA_DATA, getWilayas, getCommunesByWilaya, Wilaya, Commune } from '@/constants/algeria-data';
+import { getShippingRate, isStopDeskAvailable } from '@/constants/shipping-rates';
+import { supabase } from '@/integrations/supabase/client';
+import LocationPicker from '@/components/LocationPicker';
+import CommunePicker from '@/components/CommunePicker';
+import { cn } from '@/lib/utils';
 
 const Checkout = () => {
-  const { items, total, clearCart } = useCart();
+  const { items, total, clearCart, updateQuantity, updateCartAttributes, removeFromCart } = useCart();
   const navigate = useNavigate();
-  const { user } = useAuth(); // Get user to auto-fill
-  const { t, language } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
+
+  // Redirect if cart is empty
+  useEffect(() => {
+    if (items.length === 0) {
+      navigate('/');
+    }
+  }, [items, navigate]);
 
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
     wilaya: '',
     commune: '',
-    address: 'Home Delivery', // Default to Home Delivery since field is removed
+    address: 'Home Delivery', // Using 'address' field to store Delivery Type for compatibility
   });
 
-  const wilayas = getWilayas();
-  const [selectedWilayaCode, setSelectedWilayaCode] = useState<number | null>(null);
-  const [communes, setCommunes] = useState<Commune[]>([]);
+  const [shippingCost, setShippingCost] = useState(0);
 
-  // Auto-fill form if user is logged in
-  useEffect(() => {
-    const fetchUserProfile = async () => {
-      if (user) {
-        const { data } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-
-        if (data) {
-          setFormData(prev => ({
-            ...prev,
-            name: data.full_name || '',
-            phone: data.phone || '',
-            wilaya: data.wilaya || '',
-            commune: data.commune || '',
-            address: data.address || ''
-          }));
-        }
-      }
-    };
-    fetchUserProfile();
-  }, [user]);
-
-  // Update communes when wilaya changes
+  // Update shipping cost when inputs change
   useEffect(() => {
     if (formData.wilaya) {
-      const wilaya = wilayas.find(w => w.name === formData.wilaya || w.ar_name === formData.wilaya);
-      if (wilaya) {
-        setSelectedWilayaCode(wilaya.code);
-        setCommunes(getCommunesByWilaya(wilaya.code));
+      if (formData.address === 'Stop Desk' && !isStopDeskAvailable(formData.wilaya)) {
+        setFormData(prev => ({ ...prev, address: 'Home Delivery' }));
+      }
+      if (formData.address) {
+        const cost = getShippingRate(formData.wilaya, formData.address);
+        setShippingCost(cost);
       }
     }
-  }, [formData.wilaya]);
+  }, [formData.wilaya, formData.address]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmitOrder = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.name.trim() || !formData.phone.trim() || !formData.address.trim() || !formData.wilaya || !formData.commune) {
-      toast.error(t('fillAllFields'));
+    if (!formData.name || !formData.phone || !formData.wilaya || !formData.commune || !formData.address) {
+      toast.error('يرجى ملء جميع حقول التوصيل');
       return;
     }
 
     setIsSubmitting(true);
 
-    try {
-      // Save order to database
-      const orderItems = items.map((item) => ({
-        product: {
-          id: item.product.id,
-          name: item.product.name,
-          price: item.product.price,
-          image: item.product.images?.[0] || item.product.image,
-        },
-        quantity: item.quantity,
-        selectedColor: item.selectedColor,
-        selectedSize: item.selectedSize,
-      }));
+    const subtotal = total;
+    const totalAmount = subtotal + shippingCost;
 
-      // 1. Check stock availability only (Deduction handled by DB Trigger)
-      for (const item of items) {
-        const { data: productData, error: productError } = await supabase
-          .from('products')
-          .select('stock_quantity')
-          .eq('id', item.product.id)
-          .single();
+    // Prepare items for DB
+    const orderItems = items.map(item => ({
+      product: {
+        id: item.product.id,
+        name: item.product.name,
+        price: item.product.price,
+        image: item.product.images?.[0] || item.product.image
+      },
+      quantity: item.quantity,
+      selectedColor: item.selectedColor,
+      selectedSize: item.selectedSize
+    }));
 
-        if (productError || !productData) {
-          throw new Error(t('errorCheckingProductAvailability', { productName: item.product.name }));
-        }
+    const orderData = {
+      customer_name: formData.name,
+      phone: formData.phone,
+      address: `${formData.wilaya} - ${formData.commune} - ${formData.address}`,
+      items: orderItems,
+      total: totalAmount,
+      status: 'pending'
+    };
 
-        if (productData.stock_quantity < item.quantity) {
-          throw new Error(t('outOfStock', { productName: item.product.name, availableQuantity: productData.stock_quantity }));
-        }
-      }
+    // Check stocks for all items (Simplified check, ideally should be transactional)
+    for (const item of items) {
+      const { data: productData, error: fetchError } = await supabase
+        .from('products')
+        .select('stock_quantity')
+        .eq('id', item.product.id)
+        .single();
 
-      const { error } = await supabase
-        .from('orders')
-        .insert([{
-          customer_name: formData.name,
-          phone: formData.phone,
-          wilaya: formData.wilaya,
-          commune: formData.commune,
-          address: formData.address, // Now stores only detailed address
-          items: orderItems,
-          total: total,
-          status: 'pending',
-          user_id: user?.id || null
-        }]);
-
-      if (error) {
-        toast.error(t('errorSubmittingOrder'));
-        // Ideally should rollback stock here, but simplified for now (admin can cancel to restore)
+      if (fetchError || !productData) {
+        toast.error(`خطأ في التحقق من المنتجات: ${item.product.name}`);
         setIsSubmitting(false);
         return;
       }
 
-      setIsSubmitting(false);
-      setIsSuccess(true);
+      // Note: This check is simple. For multiple variants sharing stock, it's tricky.
+      // Assuming stock_quantity is global for the product for now as per current DB schema.
+      // If we have separate stocks per variant, we'd check that. 
+      // Currently schema seems to have one stock_quantity per product row.
+      if (productData.stock_quantity < item.quantity) {
+        toast.error(`عذراً، الكمية المتوفرة من ${item.product.name} غير كافية (${productData.stock_quantity})`);
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
+    const { error } = await supabase
+      .from('orders')
+      .insert([orderData]);
+
+    setIsSubmitting(false);
+    if (error) {
+      toast.error('خطأ في إرسال الطلب، يرجى المحاولة مرة أخرى');
+      console.error(error);
+    } else {
+      toast.success('تم إرسال طلبك بنجاح! سنتواصل معك قريباً');
       clearCart();
-    } catch (error: any) {
-      console.error('Checkout error:', error);
-      toast.error(error.message || t('unexpectedError'));
-      setIsSubmitting(false);
+      navigate('/');
     }
   };
 
-  if (items.length === 0 && !isSuccess) {
-    return (
-      <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
-        <div className="bg-card p-8 rounded-2xl shadow-card text-center max-w-md">
-          <h2 className="text-2xl font-bold mb-4">{t('emptyCart')}</h2>
-          <p className="text-muted-foreground mb-6">{t('continueShopping')}</p>
-          <Button variant="gold" onClick={() => navigate('/')}>
-            <ArrowRight className="h-4 w-4" />
-            {t('backToStore')}
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  if (isSuccess) {
-    return (
-      <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-4">
-        <div className="bg-card p-8 rounded-2xl shadow-card text-center max-w-md animate-scale-in">
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle2 className="h-10 w-10 text-green-600" />
-          </div>
-          <h2 className="text-2xl font-bold mb-2">{t('orderSuccess')}</h2>
-          <p className="text-muted-foreground mb-6">
-            {t('orderSuccessMessage')}
-          </p>
-          <div className="bg-secondary/50 p-4 rounded-xl mb-6">
-            <p className="text-sm text-muted-foreground">
-              📞 {t('phoneKeepClose')}
-            </p>
-          </div>
-          <Button variant="gold" onClick={() => navigate('/')} className="w-full">
-            <ArrowRight className="h-4 w-4" />
-            {t('backToStore')}
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  if (items.length === 0) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-hero py-8">
-      <div className="container mx-auto px-4 max-w-4xl">
-        {/* Back Button */}
-        <Button variant="ghost" onClick={() => navigate('/')} className="mb-6">
-          <ArrowRight className="h-4 w-4" />
-          {t('backToStore')}
+    <div className="min-h-screen bg-background pb-20" dir="rtl">
+      <Header />
+
+      <main className="container mx-auto px-2 md:px-4 pt-4 md:pt-8 max-w-6xl">
+        <Button variant="ghost" className="mb-4 md:mb-6 gap-2 text-sm" asChild>
+          <Link to="/">
+            <ArrowLeft className="h-4 w-4 rotate-180" />
+            العودة للمتجر
+          </Link>
         </Button>
 
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Form Section */}
-          <div className="bg-card p-6 md:p-8 rounded-2xl shadow-card">
-            <h1 className="text-2xl font-bold mb-6">{t('checkoutTitle')}</h1>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-start">
 
-            {user && (
-              <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 mb-4 text-sm text-primary">
-                {t('autoFill')}
-              </div>
-            )}
+          {/* Checkout Form (Right Side on Desktop, Top on Mobile) */}
+          <div className="order-1 lg:order-2">
+            <div className="bg-card rounded-2xl md:rounded-3xl p-4 md:p-6 lg:p-8 border border-border/50 shadow-lg relative overflow-hidden">
 
-            <form onSubmit={handleSubmit} className="space-y-5">
-              <div>
-                <label className="flex items-center gap-2 text-sm font-medium mb-2">
-                  <User className="h-4 w-4 text-primary" />
-                  {t('fullName')}
-                </label>
-                <Input
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder={t('fullNamePlaceholder')}
-                  className="h-12"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="flex items-center gap-2 text-sm font-medium mb-2">
-                  <Phone className="h-4 w-4 text-primary" />
-                  {t('phone')}
-                </label>
-                <Input
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  placeholder={t('phonePlaceholder')}
-                  className="h-12"
-                  dir="ltr"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-medium mb-2">
-                    <MapPin className="h-4 w-4 text-primary" />
-                    {t('wilaya')}
-                  </label>
-                  <Select
-                    value={formData.wilaya}
-                    onValueChange={(value) => {
-                      const wilaya = wilayas.find(w => w.name === value);
-                      setFormData(prev => ({ ...prev, wilaya: value, commune: '' }));
-                      if (wilaya) {
-                        setSelectedWilayaCode(wilaya.code);
-                        setCommunes(getCommunesByWilaya(wilaya.code));
-                      }
-                    }}
-                    required
-                  >
-                    <SelectTrigger className="h-12">
-                      <SelectValue placeholder={t('selectWilaya')} />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-[200px]">
-                      {wilayas.map((w) => (
-                        <SelectItem key={w.code} value={w.name}>
-                          {w.code} - {language === 'ar' ? w.ar_name : w.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-medium mb-2">
-                    <MapPin className="h-4 w-4 text-primary" />
-                    {t('commune')}
-                  </label>
-                  <Select
-                    value={formData.commune}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, commune: value }))}
-                    disabled={!selectedWilayaCode}
-                    required
-                  >
-                    <SelectTrigger className="h-12">
-                      <SelectValue placeholder={t('selectCommune')} />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-[200px]">
-                      {communes.map((c) => (
-                        <SelectItem key={c.code} value={c.name}>
-                          {language === 'ar' ? c.ar_name : c.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <label className="flex items-center gap-2 text-sm font-medium">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  {t('deliveryType')}
-                </label>
-                <div className="grid grid-cols-2 gap-4">
-                  <div
-                    onClick={() => setFormData(prev => ({ ...prev, address: 'Home Delivery' }))}
-                    className={cn(
-                      "cursor-pointer border-2 rounded-xl p-4 transition-all hover:border-primary/50",
-                      formData.address === 'Home Delivery' ? "border-primary bg-primary/5" : "border-border"
-                    )}
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className={cn("w-4 h-4 rounded-full border border-primary flex items-center justify-center", formData.address === 'Home Delivery' ? "bg-primary" : "bg-transparent")}>
-                        {formData.address === 'Home Delivery' && <CheckCircle2 className="w-3 h-3 text-white" />}
+              <h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
+                <ShoppingBag className="h-6 w-6 text-primary" />
+                ملخص الطلب
+              </h2>
+              <div className="space-y-6 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+                {items.map((item, idx) => (
+                  <div key={`${item.product.id}-${item.selectedColor}-${item.selectedSize}`} className="flex gap-4 items-start border-b border-border/50 pb-4 last:border-0 last:pb-0">
+                    <div className="h-24 w-24 rounded-xl overflow-hidden bg-white border shrink-0 relative">
+                      <img
+                        src={item.product.images?.[0] || item.product.image}
+                        alt={item.product.name}
+                        className="h-full w-full object-cover"
+                      />
+                      {/* Quantity Badge/Control Overlay */}
+                      <div className="absolute inset-x-0 bottom-0 bg-black/60 backdrop-blur-sm p-1 flex justify-center items-center gap-2">
+                        <button
+                          type="button"
+                          className="text-white hover:text-red-400 disabled:opacity-50"
+                          onClick={() => updateQuantity(item.product.id, item.selectedColor, item.selectedSize, item.quantity - 1)}
+                          disabled={item.quantity <= 1}
+                        >
+                          <span className="text-lg font-bold w-4 flex justify-center">-</span>
+                        </button>
+                        <span className="text-white font-bold text-xs">{item.quantity}</span>
+                        <button
+                          type="button"
+                          className="text-white hover:text-green-400"
+                          onClick={() => updateQuantity(item.product.id, item.selectedColor, item.selectedSize, item.quantity + 1)}
+                        >
+                          <span className="text-lg font-bold w-4 flex justify-center">+</span>
+                        </button>
                       </div>
-                      <span className="font-bold text-sm">{t('homeDelivery')}</span>
                     </div>
-                  </div>
-
-                  <div
-                    onClick={() => setFormData(prev => ({ ...prev, address: 'Stop Desk' }))}
-                    className={cn(
-                      "cursor-pointer border-2 rounded-xl p-4 transition-all hover:border-primary/50",
-                      formData.address === 'Stop Desk' ? "border-primary bg-primary/5" : "border-border"
-                    )}
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className={cn("w-4 h-4 rounded-full border border-primary flex items-center justify-center", formData.address === 'Stop Desk' ? "bg-primary" : "bg-transparent")}>
-                        {formData.address === 'Stop Desk' && <CheckCircle2 className="w-3 h-3 text-white" />}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-bold text-base line-clamp-2 leading-tight pl-2">{item.product.name}</h3>
+                        <div className="flex flex-col items-end shrink-0">
+                          <span className="font-bold text-primary">{item.product.price * item.quantity} د.ج</span>
+                          <span className="text-[10px] text-muted-foreground">{item.product.price} / حبة</span>
+                        </div>
                       </div>
-                      <span className="font-bold text-sm">{t('stopDeskDelivery')}</span>
+
+                      {/* Edit Variant Controls */}
+                      <div className="flex flex-wrap gap-3 mt-2">
+                        {/* Colors */}
+                        {item.product.colors && item.product.colors.length > 0 && (
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[10px] text-muted-foreground font-bold">اللون:</span>
+                            <div className="flex -space-x-2 space-x-reverse overflow-x-auto pb-1 max-w-[120px] scrollbar-hide">
+                              {item.product.colors.map(color => (
+                                <button
+                                  key={color}
+                                  type="button"
+                                  onClick={() => updateCartAttributes(
+                                    { productId: item.product.id, color: item.selectedColor, size: item.selectedSize },
+                                    { color: color, size: item.selectedSize }
+                                  )}
+                                  className={cn(
+                                    "w-6 h-6 rounded-full border-2 transition-all shadow-sm focus:outline-none focus:ring-2 ring-primary ring-offset-1 flex-shrink-0",
+                                    item.selectedColor === color ? "border-primary z-10 scale-110" : "border-white hover:z-10 hover:scale-110"
+                                  )}
+                                  style={{ backgroundColor: color }}
+                                  title={color}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Sizes */}
+                        {item.product.sizes && item.product.sizes.length > 0 && (
+                          <div className="flex flex-col gap-1">
+                            <span className="text-[10px] text-muted-foreground font-bold">المقياس:</span>
+                            <div className="flex flex-wrap gap-1">
+                              {item.product.sizes.map(size => (
+                                <button
+                                  key={size}
+                                  type="button"
+                                  onClick={() => updateCartAttributes(
+                                    { productId: item.product.id, color: item.selectedColor, size: item.selectedSize },
+                                    { color: item.selectedColor, size: size }
+                                  )}
+                                  className={cn(
+                                    "px-2 py-0.5 text-[10px] font-bold rounded-lg border transition-all",
+                                    item.selectedSize === size
+                                      ? "bg-primary text-white border-primary shadow-sm"
+                                      : "bg-background text-muted-foreground border-border hover:border-primary/50"
+                                  )}
+                                >
+                                  {size}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
+
+                    {/* Remove Item Button */}
+                    <button
+                      type="button"
+                      onClick={() => removeFromCart(item.product.id, item.selectedColor, item.selectedSize)}
+                      className="text-muted-foreground hover:text-destructive transition-colors p-1 -mt-1 -ml-2"
+                      title="حذف"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
                   </div>
-                </div>
-                {formData.address === 'Stop Desk' && (
-                  <p className="text-xs text-muted-foreground bg-secondary/50 p-3 rounded-lg border border-border">
-                    {t('stopDeskLabel')}
-                  </p>
-                )}
+                ))}
               </div>
 
-              <Button
-                type="submit"
-                variant="gold"
-                size="lg"
-                className="w-full"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <span className="flex items-center gap-2">
-                    <span className="h-4 w-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                    {t('loading')}
+              <div className="mt-6 pt-6 border-t border-border/50 space-y-3">
+                <div className="flex justify-between items-center text-muted-foreground">
+                  <span>المجموع الفرعي:</span>
+                  <span>{total} د.ج</span>
+                </div>
+                <div className="flex justify-between items-center text-muted-foreground">
+                  <span>السعر للتوصيل:</span>
+                  <span className={shippingCost === 0 ? "text-green-500 font-bold" : ""}>
+                    {formData.wilaya ? (shippingCost === 0 ? "مجاني" : `${shippingCost} د.ج`) : "-"}
                   </span>
-                ) : (
-                  t('confirmOrder')
-                )}
-              </Button>
-            </form>
-
-            <p className="text-xs text-muted-foreground text-center mt-4">
-              {t('paymentMethod')}
-            </p>
-          </div>
-
-          {/* Order Summary */}
-          <div className="bg-card p-6 md:p-8 rounded-2xl shadow-card h-fit">
-            <h2 className="text-xl font-bold mb-6">{t('orderSummary')}</h2>
-
-            <div className="space-y-4 mb-6">
-              {items.map((item) => (
-                <div
-                  key={`${item.product.id}-${item.selectedColor}-${item.selectedSize}`}
-                  className="flex gap-3"
-                >
-                  <img
-                    src={item.product.images?.[0] || item.product.image}
-                    alt={item.product.name}
-                    className="w-16 h-20 object-cover rounded-lg"
-                  />
-                  <div className="flex-1">
-                    <h3 className="font-medium text-sm line-clamp-1">{item.product.name}</h3>
-                    <p className="text-xs text-muted-foreground">
-                      {item.selectedColor} • {item.selectedSize} • {t('quantity')}: {item.quantity}
-                    </p>
-                    <p className="text-primary font-semibold mt-1">
-                      {item.product.price * item.quantity} {t('currency')}
-                    </p>
-                  </div>
                 </div>
-              ))}
+                <div className="flex justify-between items-center text-2xl font-black pt-4 border-t border-border">
+                  <span>المجموع الكلي:</span>
+                  <span className="text-primary">{total + shippingCost} د.ج</span>
+                </div>
+              </div>
             </div>
 
-            <div className="border-t border-border pt-4 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{t('subtotal')}</span>
-                <span>{total} {t('currency')}</span>
+            {/* Security Badge or Info */}
+            <div className="bg-secondary/20 rounded-2xl p-4 flex items-center justify-center gap-3 text-muted-foreground text-sm text-center">
+              <CheckCircle2 className="h-5 w-5 text-green-500" />
+              <span>تسوق آمن 100% • الدفع عند الاستلام</span>
+            </div>
+          </div>
+
+          {/* Checkout Form (Right Side on Desktop) */}
+          <div className="order-1 lg:order-2">
+            <div className="bg-card rounded-3xl p-6 lg:p-8 border border-border/50 shadow-lg relative overflow-hidden">
+              {/* Decorative background blur */}
+              <div className="absolute -top-20 -right-20 w-60 h-60 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+
+              <div className="mb-8 relative">
+                <h1 className="text-3xl font-black mb-2">إتمام الطلب 🚀</h1>
+                <p className="text-muted-foreground">أكمل البيانات التالية لتأكيد طلبك</p>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">{t('delivery')}</span>
-                <span className="text-green-600 font-medium">{t('free')}</span>
-              </div>
-              <div className="flex justify-between text-lg font-bold pt-2 border-t border-border">
-                <span>{t('total')}</span>
-                <span className="text-primary">{total} {t('currency')}</span>
-              </div>
+
+              <form onSubmit={handleSubmitOrder} className="space-y-6 relative">
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <User className="h-4 w-4 text-primary" />
+                    الاسم الكامل
+                  </Label>
+                  <Input
+                    placeholder="أدخل اسمك الكامل"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    className="h-12 bg-background border-input/50 focus:border-primary"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <Phone className="h-4 w-4 text-primary" />
+                    رقم الهاتف
+                  </Label>
+                  <Input
+                    placeholder="0XXXXXXXXX"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    dir="ltr"
+                    className="h-12 bg-background border-input/50 focus:border-primary text-right"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-primary" />
+                      الولاية
+                    </Label>
+                    <LocationPicker
+                      value={formData.wilaya}
+                      onChange={(wilaya) => setFormData({ ...formData, wilaya })}
+                      placeholder="اختر الولاية"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-primary" />
+                      البلدية
+                    </Label>
+                    <Input
+                      placeholder="اكتب اسم البلدية"
+                      value={formData.commune}
+                      onChange={(e) => setFormData({ ...formData, commune: e.target.value })}
+                      className="h-12 bg-background border-input/50 focus:border-primary"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-4 pt-2">
+                  <Label className="flex items-center gap-2">
+                    <Truck className="h-4 w-4 text-primary" />
+                    نوع التوصيل
+                  </Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div
+                      onClick={() => setFormData(prev => ({ ...prev, address: 'Home Delivery' }))}
+                      className={cn(
+                        "cursor-pointer border-2 rounded-2xl p-4 transition-all hover:border-primary/50 flex flex-col items-center justify-center gap-3 text-center h-28 relative overflow-hidden",
+                        formData.address === 'Home Delivery' ? "border-primary bg-primary/5 shadow-md" : "border-border bg-background"
+                      )}
+                    >
+                      {formData.address === 'Home Delivery' && (
+                        <div className="absolute top-2 right-2 text-primary">
+                          <CheckCircle2 className="h-5 w-5" />
+                        </div>
+                      )}
+                      <div className={cn("w-10 h-10 rounded-full flex items-center justify-center transition-colors", formData.address === 'Home Delivery' ? "bg-primary text-white" : "bg-secondary text-muted-foreground")}>
+                        <Truck className="h-5 w-5" />
+                      </div>
+                      <span className="font-bold text-sm">توصيل للمنزل</span>
+                    </div>
+
+                    <div
+                      onClick={() => {
+                        if (isStopDeskAvailable(formData.wilaya)) {
+                          setFormData(prev => ({ ...prev, address: 'Stop Desk' }));
+                        } else {
+                          if (formData.wilaya) toast.error('توصيل للمكتب غير متوفر لهذه الولاية');
+                          else toast.error('يرجى اختيار الولاية أولاً');
+                        }
+                      }}
+                      className={cn(
+                        "cursor-pointer border-2 rounded-2xl p-4 transition-all flex flex-col items-center justify-center gap-3 text-center h-28 relative overflow-hidden",
+                        formData.address === 'Stop Desk' ? "border-primary bg-primary/5 shadow-md" : "border-border bg-background",
+                        !isStopDeskAvailable(formData.wilaya) && formData.wilaya ? "opacity-50 grayscale cursor-not-allowed bg-secondary/30" : "hover:border-primary/50"
+                      )}
+                    >
+                      {formData.address === 'Stop Desk' && (
+                        <div className="absolute top-2 right-2 text-primary">
+                          <CheckCircle2 className="h-5 w-5" />
+                        </div>
+                      )}
+                      {!isStopDeskAvailable(formData.wilaya) && formData.wilaya && (
+                        <div className="absolute inset-x-0 bottom-0 bg-destructive/10 text-destructive text-[10px] font-bold py-1">
+                          غير متوفر
+                        </div>
+                      )}
+                      <div className={cn("w-10 h-10 rounded-full flex items-center justify-center transition-colors", formData.address === 'Stop Desk' ? "bg-primary text-white" : "bg-secondary text-muted-foreground")}>
+                        <MapPin className="h-5 w-5" />
+                      </div>
+                      <span className="font-bold text-sm">توصيل للمكتب</span>
+                    </div>
+                  </div>
+                </div>
+
+                <Button
+                  size="lg"
+                  className="w-full h-14 text-xl font-bold bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20 rounded-2xl mt-8"
+                  disabled={isSubmitting}
+                  type="submit"
+                >
+                  {isSubmitting ? (
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                  ) : (
+                    <>
+                      تأكيد الطلب
+                      <span className="mr-2 text-sm bg-white/20 px-2 py-0.5 rounded-full">{total + shippingCost} د.ج</span>
+                    </>
+                  )}
+                </Button>
+              </form>
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };

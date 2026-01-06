@@ -18,6 +18,7 @@ const ProductCarousel = ({ products }: ProductCarouselProps) => {
         loop: true,
         dragFree: true,
         skipSnaps: true,
+        dragThreshold: 3, // Ultra responsive for mobile to fix "not moving" feel
     });
 
     const scrollPrev = useCallback(() => {
@@ -43,23 +44,23 @@ const ProductCarousel = ({ products }: ProductCarouselProps) => {
                 </div>
             </div>
 
-            {/* Navigation Buttons */}
+            {/* Navigation Buttons - Visible on Mobile now */}
             <Button
                 variant="outline"
                 size="icon"
-                className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 bg-background/80 backdrop-blur-sm z-10 rounded-full opacity-0 group-hover/carousel:opacity-100 transition-opacity hidden md:flex"
+                className="absolute left-1 top-1/2 -translate-y-1/2 bg-white/90 shadow-md backdrop-blur-sm z-10 rounded-full h-8 w-8 md:h-10 md:w-10 opacity-70 hover:opacity-100 md:opacity-0 md:group-hover/carousel:opacity-100 transition-all"
                 onClick={scrollPrev}
             >
-                <ChevronLeft className="h-6 w-6" />
+                <ChevronLeft className="h-4 w-4 md:h-6 md:w-6" />
             </Button>
 
             <Button
                 variant="outline"
                 size="icon"
-                className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 bg-background/80 backdrop-blur-sm z-10 rounded-full opacity-0 group-hover/carousel:opacity-100 transition-opacity hidden md:flex"
+                className="absolute right-1 top-1/2 -translate-y-1/2 bg-white/90 shadow-md backdrop-blur-sm z-10 rounded-full h-8 w-8 md:h-10 md:w-10 opacity-70 hover:opacity-100 md:opacity-0 md:group-hover/carousel:opacity-100 transition-all"
                 onClick={scrollNext}
             >
-                <ChevronRight className="h-6 w-6" />
+                <ChevronRight className="h-4 w-4 md:h-6 md:w-6" />
             </Button>
 
             {/* Custom Scroll Indicator for Mobile */}
