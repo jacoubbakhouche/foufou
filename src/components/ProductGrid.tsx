@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProducts, useCategories } from '@/hooks/useProducts';
-import ProductCarousel from '@/components/ProductCarousel';
+import ProductCard from '@/components/ProductCard';
 import { cn } from '@/lib/utils';
 
 const ProductGrid = () => {
@@ -69,8 +69,12 @@ const ProductGrid = () => {
             <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
           </div>
         ) : (
-          <div className="mt-8 px-4">
-            <ProductCarousel products={products} />
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 mt-8 px-4">
+            {products.map((product) => (
+              <div key={product.id} className="w-full">
+                <ProductCard product={product} />
+              </div>
+            ))}
           </div>
         )}
 
