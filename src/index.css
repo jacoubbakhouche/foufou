@@ -229,3 +229,28 @@
     transform: translateY(110vh) translateX(-5px);
   }
 }
+
+/* Mobile Performance Optimizations */
+@media (max-width: 768px) {
+  * {
+    /* Disable heavy blurs on mobile */
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+  
+  /* Retain simple transparency without blur for key elements if needed */
+  .bg-white\/95, .bg-background\/95 {
+    background-color: hsl(var(--background) / 0.98) !important;
+  }
+
+  /* Simplify shadows */
+  .shadow-gold, .shadow-card, .shadow-soft {
+    box-shadow: 0 2px 8px -2px rgba(0,0,0,0.1) !important;
+  }
+  
+  /* Disable heavy animations */
+  .animate-float, .animate-pulse, .animate-fade-up, .animate-scale-in {
+    animation: none !important;
+    transition: none !important;
+  }
+}

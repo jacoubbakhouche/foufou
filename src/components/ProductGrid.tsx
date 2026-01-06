@@ -14,7 +14,7 @@ const ProductGrid = () => {
   const { products, loading, hasMore } = useProducts({
     category: selectedCategory === 'الكل' ? null : selectedCategory,
     page,
-    limit: 12 // 12 items per load
+    limit: 8 // Limit to 8 items (2 rows of 4)
   });
 
   // Independent Category Fetch
@@ -28,18 +28,12 @@ const ProductGrid = () => {
     }
   };
 
-  // Chunk products if we still want carousels?
-  // Since we load iteratively, we can just show one big grid OR append carousels.
-  // The original design had "Groups of 6". 
-  // If we simply display all loaded products in a Grid (or multiple carousels), it works.
-  // Let's stick to the existing "Carousel Grouping" visual for consistency, but now we group the *fetched* products.
-
   const chunkProducts = (arr: any[], size: number) => {
     return Array.from({ length: Math.ceil(arr.length / size) }, (v, i) =>
       arr.slice(i * size, i * size + size)
     );
   };
-  const productGroups = chunkProducts(products, 6);
+  const productGroups = chunkProducts(products, 4); // Group by 4 items per carousel
 
   return (
     <section id="products" className="py-16 md:py-24 bg-background overflow-hidden">
