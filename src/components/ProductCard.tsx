@@ -67,8 +67,8 @@ const ProductCard = ({ product, compact = false }: ProductCardProps) => {
   return (
     <div
       className={cn(
-        "group bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 border border-transparent hover:border-gold/20 flex flex-col h-full",
-        compact ? "w-full" : ""
+        "group bg-card rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 border border-transparent hover:border-gold/20 flex flex-col h-full w-full",
+        compact ? "" : ""
       )}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -106,9 +106,9 @@ const ProductCard = ({ product, compact = false }: ProductCardProps) => {
               {t('outOfStock')}
             </span>
           ) : (
-            <span className="bg-white/95 backdrop-blur text-black text-[10px] font-bold px-2 py-0.5 rounded shadow-md animate-scale-in flex items-center gap-1 border border-black/5">
+            <span className="bg-white/95 dark:bg-secondary/90 backdrop-blur text-black dark:text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-md animate-scale-in flex items-center gap-1 border border-black/5 dark:border-white/10">
               <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
-              <span className="text-black">{product.stock_quantity} {t('pieces')}</span>
+              <span className="text-black dark:text-white">{product.stock_quantity} {t('pieces')}</span>
             </span>
           )}
         </div>
