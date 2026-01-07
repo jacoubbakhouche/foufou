@@ -49,8 +49,15 @@ const Footer = () => {
                 <span>contact@layastyle23.dz</span>
               </li>
               <li className="flex items-center gap-2">
-                <MapPin className="h-4 w-4 text-primary" />
-                <span>{t('annaba')}</span>
+                <a
+                  href="https://www.google.com/maps/place/Laya_style.23/@36.9011282,7.7596387,15z/data=!4m6!3m5!1s0x12f0075b0f7c1dfb:0x6a21f9a69a042e57!8m2!3d36.9011282!4d7.7596387!16s%2Fg%2F11zjvp9vv5"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-2 hover:text-primary transition-colors group"
+                >
+                  <span className="text-lg animate-bounce">📍</span>
+                  <span className="group-hover:underline underline-offset-4 decoration-primary">{t('annaba')}</span>
+                </a>
               </li>
             </ul>
 

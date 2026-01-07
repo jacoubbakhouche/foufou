@@ -251,8 +251,12 @@ const ProductDetail = () => {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-background z-[50]">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            <div className="min-h-screen bg-background flex flex-col">
+                <Header />
+                <main className="flex-1 flex items-center justify-center">
+                    <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                </main>
+                <Footer />
             </div>
         );
     }

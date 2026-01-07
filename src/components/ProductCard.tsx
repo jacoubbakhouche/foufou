@@ -115,7 +115,7 @@ const ProductCard = ({ product, compact = false }: ProductCardProps) => {
             <div className="relative flex items-center justify-center w-8 h-8 drop-shadow-md animate-pulse">
               <Flame className="w-full h-full text-red-600 fill-red-600" />
               <span className="absolute text-[8px] font-bold text-white top-[55%] left-1/2 -translate-x-1/2 -translate-y-1/2">
-                NOW
+                NEW
               </span>
             </div>
           )}

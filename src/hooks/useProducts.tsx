@@ -150,6 +150,7 @@ export const fetchProductById = async (id: string): Promise<Product | null> => {
       description: data.description || '',
       inStock: data.in_stock,
       stock_quantity: data.stock_quantity || 0,
+      isNew: new Date(data.created_at) > new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
     } as Product;
   } catch (err) {
     console.error('Error fetching product:', err);

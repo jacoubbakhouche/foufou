@@ -171,10 +171,8 @@ const Catalog = ({ mode = 'default' }: CatalogProps) => {
                     {/* Product Grid */}
                     <div className="flex-1">
                         {loading && products.length === 0 ? (
-                            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
-                                {[...Array(8)].map((_, i) => (
-                                    <div key={i} className="aspect-[4/5] bg-secondary animate-pulse rounded-2xl" />
-                                ))}
+                            <div className="flex items-center justify-center min-h-[400px] w-full">
+                                <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
                             </div>
                         ) : products.length > 0 ? (
                             <>

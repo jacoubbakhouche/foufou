@@ -66,16 +66,8 @@ const ProductGrid = () => {
 
         {/* Product Carousels */}
         {loading && products.length === 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5 md:gap-6 mt-8 -mx-2 px-1 md:mx-0 md:px-4">
-            {[...Array(8)].map((_, i) => (
-              <div key={i} className="flex flex-col gap-3">
-                <Skeleton className="w-full aspect-[4/5] rounded-2xl" />
-                <div className="px-1 space-y-2">
-                  <Skeleton className="h-4 w-3/4 bg-gray-200 dark:bg-gray-800" />
-                  <Skeleton className="h-4 w-1/2 bg-gray-200 dark:bg-gray-800" />
-                </div>
-              </div>
-            ))}
+          <div className="flex items-center justify-center min-h-[300px] w-full">
+            <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5 md:gap-6 mt-8 -mx-2 px-1 md:mx-0 md:px-4">
