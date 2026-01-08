@@ -4,7 +4,7 @@ import { translations, Language } from '@/i18n/translations';
 interface LanguageContextType {
     language: Language;
     setLanguage: (lang: Language) => void;
-    t: (key: string) => string;
+    t: (key: string, defaultValue?: string) => string;
     dir: 'rtl' | 'ltr';
 }
 
@@ -24,7 +24,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
         document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
     }, [language]);
 
-    const t = (key: string) => {
+    const t = (key: string, defaultValue?: string) => {
         // Support nested keys (e.g., 'status.pending')
         const keys = key.split('.');
         let value: any = translations[language];
@@ -33,11 +33,11 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
             if (value && typeof value === 'object' && k in value) {
                 value = value[k as keyof typeof value];
             } else {
-                return key; // Return key if translation not found
+                return defaultValue || key; // Return default value or key if translation not found
             }
         }
 
-        return value as string;
+        return (value as string) || defaultValue || key;
     };
 
     return (
