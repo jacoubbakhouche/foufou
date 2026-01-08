@@ -108,10 +108,10 @@ const Hero = () => {
         </p>
 
         {/* Call to Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-5 w-full sm:w-auto animate-in fade-in slide-in-from-bottom-6 duration-1000 fill-mode-forwards delay-500">
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 w-full sm:w-auto animate-in fade-in slide-in-from-bottom-6 duration-1000 fill-mode-forwards delay-500">
           <Button
             size="lg"
-            className="h-14 px-12 text-lg rounded-full bg-gold hover:bg-gold-light text-black transition-all shadow-[0_0_20px_rgba(212,175,55,0.3)] hover:shadow-[0_0_30px_rgba(212,175,55,0.5)] hover:scale-105 font-bold"
+            className="h-12 lg:h-14 px-8 lg:px-12 text-base lg:text-lg rounded-full bg-gold hover:bg-gold-light text-black transition-all shadow-[0_0_20px_rgba(212,175,55,0.3)] hover:shadow-[0_0_30px_rgba(212,175,55,0.5)] hover:scale-105 font-bold"
             onClick={() => {
               const element = document.getElementById('products');
               element?.scrollIntoView({ behavior: 'smooth' });
@@ -122,7 +122,7 @@ const Hero = () => {
           <Button
             variant="outline"
             size="lg"
-            className="h-14 px-12 text-lg rounded-full border-2 border-white/30 text-white hover:bg-white/10 hover:border-white transition-all backdrop-blur-sm bg-transparent font-medium"
+            className="h-12 lg:h-14 px-8 lg:px-12 text-base lg:text-lg rounded-full border-2 border-white/30 text-white hover:bg-white/10 hover:border-white transition-all backdrop-blur-sm bg-transparent font-medium"
             onClick={() => navigate('/catalog')}
           >
             {t('browseCollections', 'تصفح المجموعات')}

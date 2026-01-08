@@ -6,6 +6,7 @@ import { Product } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 import { ChevronLeft, ShoppingBag, ArrowRight, Share2, Check, User, Phone, MapPin, CheckCircle2, Package, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
