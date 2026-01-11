@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import LocationPicker from '@/components/LocationPicker';
 import { getShippingRate, isStopDeskAvailable } from '@/constants/shipping-rates';
 import { supabase } from '@/integrations/supabase/client';
+import { ProductDetailSkeleton } from '@/components/skeletons/ProductDetailSkeleton';
 
 const ProductDetail = () => {
     const { id } = useParams<{ id: string }>();
@@ -251,15 +252,7 @@ const ProductDetail = () => {
     console.log("ProductDetail Render State:", { loading, product, id });
 
     if (loading) {
-        return (
-            <div className="min-h-screen bg-background flex flex-col">
-                <Header />
-                <main className="flex-1 flex items-center justify-center">
-                    <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-                </main>
-                <Footer />
-            </div>
-        );
+        return <ProductDetailSkeleton />;
     }
 
     if (!product) {

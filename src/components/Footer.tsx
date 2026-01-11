@@ -104,7 +104,17 @@ const Footer = () => {
         </div>
 
         <div className="border-t border-border mt-8 pt-8 text-center text-muted-foreground text-sm">
-          <p>&copy; {new Date().getFullYear()} layastyle23. {t('rightsReserved')}</p>
+          <p>
+            &copy; {new Date().getFullYear()} layastyle23.
+            <a
+              href="https://www.instagram.com/jacobbakhouche?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+              target="_blank"
+              rel="noreferrer"
+              className="rainbow-border hover:scale-105 inline-block text-foreground font-bold transition-transform ml-1"
+            >
+              Developed by Jacob Bakhouche
+            </a>
+          </p>
         </div>
       </div>
     </footer>

@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { AdminDashboardSkeleton } from '@/components/skeletons/AdminDashboardSkeleton';
 import {
   LogOut, Plus, Pencil, Trash2, Package, ShoppingCart,
   RefreshCcw, Home, Phone, MapPin, User, Upload, X, Check, Link as LinkIcon, Search, MessageSquare
@@ -393,11 +394,7 @@ const Admin = () => {
   };
 
   if (loading || isLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
-        <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    );
+    return <AdminDashboardSkeleton />;
   }
 
   if (!isAdmin) return null;

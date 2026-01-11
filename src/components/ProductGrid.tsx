@@ -4,6 +4,7 @@ import { useProducts, useCategories } from '@/hooks/useProducts';
 import ProductCard from '@/components/ProductCard';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ProductCardSkeleton } from '@/components/skeletons/ProductCardSkeleton';
 
 const ProductGrid = () => {
   const navigate = useNavigate();
@@ -66,8 +67,10 @@ const ProductGrid = () => {
 
         {/* Product Carousels */}
         {loading && products.length === 0 ? (
-          <div className="flex items-center justify-center min-h-[300px] w-full">
-            <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5 md:gap-6 mt-8 -mx-2 px-1 md:mx-0 md:px-4">
+            {[...Array(8)].map((_, i) => (
+              <ProductCardSkeleton key={i} />
+            ))}
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1.5 md:gap-6 mt-8 -mx-2 px-1 md:mx-0 md:px-4">
