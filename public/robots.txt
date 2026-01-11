@@ -12,3 +12,5 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://foufou-torinojs.vercel.app/sitemap.xml

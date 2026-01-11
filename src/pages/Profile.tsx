@@ -11,11 +11,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import {
     User, Phone, MapPin, Package, Star,
-    LogOut, Save, Loader2, Edit
+    LogOut, Save, Loader2, Edit, MessageSquare
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { ALGERIA_DATA, getWilayas, getCommunesByWilaya, Wilaya, Commune } from '@/constants/algeria-data';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import ChatWindow from '@/components/chat/ChatWindow';
+import ChatList from '@/components/chat/ChatList';
 
 interface Profile {
     id: string;
@@ -176,16 +179,85 @@ const Profile = () => {
         );
     }
 
+    const [isChatOpen, setIsChatOpen] = useState(false);
+    const [activeChatId, setActiveChatId] = useState<string | null>(null);
+    const [adminUser, setAdminUser] = useState<any>(null); // To store admin details
+
+    const handleStartSupportChat = async () => {
+        try {
+            // 1. Find an admin ID
+            // Ideally we query a user by role 'admin'.
+            // Since we lack a direct way to list admins in frontend safely, 
+            // we will try to find the specific known admin email OR use a RPC if it existed.
+            // For now, let's assume we can fetch "any" admin or the master admin.
+
+            // Hack: Fetch the admin user by a known email query or just check if we have a conversation already?
+            // Better: use create_or_get_conversation with a specific Admin UUID if we knew it.
+            // Since we don't know the Admin UUID, we can't easily start a NEW chat unless we know who to chat with.
+
+            // Workaround: We will query the 'user_roles' table if policy allows, to find an admin.
+            // @ts-ignore
+            const { data: roles } = await supabase
+                .from('user_roles')
+                .select('user_id')
+                .eq('role', 'admin')
+                .limit(1);
+
+            if (!roles || roles.length === 0) {
+                toast.error(t('noSupportAgents', 'لا يوجد ممثلي دعم متاحين حالياً'));
+                return;
+            }
+
+            const adminId = roles[0].user_id;
+
+            // 2. Create or Get Conversation
+            // @ts-ignore
+            const { data: conversationId, error } = await supabase.rpc('create_or_get_conversation', {
+                other_user_id: adminId
+            });
+
+            if (error) throw error;
+
+            setActiveChatId(conversationId);
+            setAdminUser({ full_name: 'Dernière Chance Support', avatar_url: '' }); // Generic support name
+            setIsChatOpen(true);
+
+        } catch (error) {
+            console.error('Chat start error:', error);
+            toast.error(t('error'));
+        }
+    };
+
+    // ... inside return ...
     return (
         <div className="min-h-screen bg-gradient-hero pb-20">
+            {/* Chat Dialog */}
+            <Dialog open={isChatOpen} onOpenChange={setIsChatOpen}>
+                <DialogContent className="sm:max-w-md h-[500px] p-0 overflow-hidden">
+                    {activeChatId && adminUser && (
+                        <ChatWindow
+                            conversationId={activeChatId}
+                            otherUser={adminUser}
+                        />
+                    )}
+                </DialogContent>
+            </Dialog>
+
             <div className="container mx-auto px-4 py-8 max-w-4xl">
                 <div className="flex items-center justify-between mb-8">
                     <h1 className="text-3xl font-bold text-foreground">{t('myProfile')}</h1>
-                    <Button variant="ghost" className="text-destructive hover:text-destructive/80" onClick={signOut}>
-                        <LogOut className="h-5 w-5 ml-2" />
-                        {t('logout')}
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button variant="gold" size="sm" onClick={handleStartSupportChat} className="gap-2">
+                            <MessageSquare className="h-4 w-4" />
+                            {t('contactSupport', 'الدعم الفني')}
+                        </Button>
+                        <Button variant="ghost" className="text-destructive hover:text-destructive/80" onClick={signOut}>
+                            <LogOut className="h-5 w-5 ml-2" />
+                            {t('logout')}
+                        </Button>
+                    </div>
                 </div>
+
 
                 {/* Loyalty Points Card */}
                 <Card className="bg-gradient-to-r from-primary/10 to-transparent border-primary/20 mb-8 overflow-hidden relative">

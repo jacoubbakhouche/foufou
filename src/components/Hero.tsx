@@ -5,6 +5,8 @@ import { cn } from '@/lib/utils';
 import { useLanguage } from '@/context/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useProducts } from '@/hooks/useProducts';
+import HeroProductCarousel from './HeroProductCarousel';
 
 const DEFAULT_HERO_IMAGES = [
   "/slider/1.jpg",
@@ -44,6 +46,8 @@ const Hero = () => {
     fetchSettings();
   }, []);
 
+  const { products: newArrivals } = useProducts({ isNew: true, limit: 10 });
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
@@ -59,7 +63,7 @@ const Hero = () => {
   };
 
   return (
-    <section className="relative min-h-[90vh] w-full overflow-hidden bg-black text-white">
+    <section className="relative min-h-[90vh] w-full overflow-hidden bg-black text-white isolate will-change-transform">
       {/* Background Image Slider */}
       <div className="absolute inset-0 z-0">
         {heroImages.map((img, index) => (
@@ -108,10 +112,10 @@ const Hero = () => {
         </p>
 
         {/* Call to Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 sm:gap-5 w-full sm:w-auto animate-in fade-in slide-in-from-bottom-6 duration-1000 fill-mode-forwards delay-500">
+        <div className="flex flex-row gap-3 w-auto animate-in fade-in slide-in-from-bottom-6 duration-1000 fill-mode-forwards delay-500">
           <Button
-            size="lg"
-            className="h-12 lg:h-14 px-8 lg:px-12 text-base lg:text-lg rounded-full bg-gold hover:bg-gold-light text-black transition-all shadow-[0_0_20px_rgba(212,175,55,0.3)] hover:shadow-[0_0_30px_rgba(212,175,55,0.5)] hover:scale-105 font-bold"
+            size="default"
+            className="h-10 px-6 text-sm lg:text-base rounded-full bg-gold hover:bg-gold-light text-black transition-all shadow-[0_0_20px_rgba(212,175,55,0.3)] hover:shadow-[0_0_30px_rgba(212,175,55,0.5)] hover:scale-105 font-bold"
             onClick={() => {
               const element = document.getElementById('products');
               element?.scrollIntoView({ behavior: 'smooth' });
@@ -121,12 +125,17 @@ const Hero = () => {
           </Button>
           <Button
             variant="outline"
-            size="lg"
-            className="h-12 lg:h-14 px-8 lg:px-12 text-base lg:text-lg rounded-full border-2 border-white/30 text-white hover:bg-white/10 hover:border-white transition-all backdrop-blur-sm bg-transparent font-medium"
+            size="default"
+            className="h-10 px-6 text-sm lg:text-base rounded-full border-2 border-white/30 text-white hover:bg-white/10 hover:border-white transition-all backdrop-blur-sm bg-transparent font-medium"
             onClick={() => navigate('/catalog')}
           >
             {t('browseCollections', 'تصفح المجموعات')}
           </Button>
+        </div>
+
+        {/* New Arrivals Carousel */}
+        <div className="relative z-30 w-full max-w-[100vw] lg:max-w-4xl mt-6 transform-gpu">
+          <HeroProductCarousel products={newArrivals} />
         </div>
 
         {/* Feature Highlights (Bottom) */}

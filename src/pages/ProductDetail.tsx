@@ -266,9 +266,15 @@ const ProductDetail = () => {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center p-4 z-[50]">
                 <h2 className="text-2xl font-bold mb-4 text-foreground">المنتج غير موجود</h2>
-                <Button asChild>
-                    <Link to="/">العودة للمتجر</Link>
-                </Button>
+                <p className="text-muted-foreground mb-4">ID: {id}</p>
+                <div className="flex gap-4">
+                    <Button variant="outline" onClick={() => window.location.reload()}>
+                        إعادة المحاولة
+                    </Button>
+                    <Button asChild>
+                        <Link to="/">العودة للمتجر</Link>
+                    </Button>
+                </div>
             </div>
         );
     }

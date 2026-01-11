@@ -69,6 +69,10 @@ serve(async (req) => {
             privateKey: serviceAccount.private_key,
         })
 
+        if (!serviceAccount.project_id) {
+            throw new Error('Missing FIREBASE_SERVICE_ACCOUNT or invalid format')
+        }
+
         // 4. Send Notifications via FCM HTTP v1 API
         const projectId = serviceAccount.project_id
         const deviceTokens = tokens.map((t: any) => t.token)
@@ -103,8 +107,9 @@ serve(async (req) => {
             { headers: { "Content-Type": "application/json" } },
         )
     } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error)
         return new Response(
-            JSON.stringify({ error: error.message }),
+            JSON.stringify({ error: errorMessage }),
             { status: 400, headers: { "Content-Type": "application/json" } },
         )
     }

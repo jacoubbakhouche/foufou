@@ -15,11 +15,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import {
   LogOut, Plus, Pencil, Trash2, Package, ShoppingCart,
-  RefreshCcw, Home, Phone, MapPin, User, Upload, X, Check, Link as LinkIcon, Search
+  RefreshCcw, Home, Phone, MapPin, User, Upload, X, Check, Link as LinkIcon, Search, MessageSquare
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 import StoreOrganization from './admin/StoreOrganization';
+import ChatList from '@/components/chat/ChatList';
+import ChatWindow from '@/components/chat/ChatWindow';
 
 interface Product {
   id: string;
@@ -57,6 +59,7 @@ const Admin = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [selectedChat, setSelectedChat] = useState<{ id: string, user: any } | null>(null);
 
   const [productForm, setProductForm] = useState({
     name: '',
@@ -435,6 +438,10 @@ const Admin = () => {
               <Pencil className="h-4 w-4" />
               تنسيق المتجر
             </TabsTrigger>
+            <TabsTrigger value="messages" className="gap-2">
+              <MessageSquare className="h-4 w-4" />
+              الرسائل
+            </TabsTrigger>
           </TabsList>
 
           {/* Orders Tab */}
@@ -605,6 +612,7 @@ const Admin = () => {
                       إضافة منتج
                     </Button>
                   </DialogTrigger>
+
                   <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>
@@ -800,120 +808,57 @@ const Admin = () => {
                         <Textarea
                           value={productForm.description}
                           onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
-                          placeholder="وصف المنتج..."
+                          placeholder="وصف تفصيلي للمنتج..."
+                          className="min-h-[100px]"
                         />
                       </div>
-                      <div>
-                        <label className="text-sm font-medium mb-1 block">الكمية المتوفرة *</label>
-                        <Input
-                          type="number"
-                          min="0"
-                          value={productForm.stock_quantity}
-                          onChange={(e) => setProductForm({ ...productForm, stock_quantity: e.target.value })}
-                          placeholder="0"
-                        />
-                        <p className="text-xs text-muted-foreground mt-1">عدد القطع المتوفرة في المخزون</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          id="in_stock"
-                          checked={productForm.in_stock}
-                          onChange={(e) => setProductForm({ ...productForm, in_stock: e.target.checked })}
-                          className="rounded"
-                        />
-                        <label htmlFor="in_stock" className="text-sm">متوفر في المخزون</label>
-                      </div>
-                      <Button variant="gold" className="w-full" onClick={handleSaveProduct}>
-                        {editingProduct ? 'تحديث المنتج' : 'إضافة المنتج'}
-                      </Button>
+                    </div>
+                    <div className="mt-6 flex justify-end gap-3">
+                      <Button variant="outline" onClick={() => setIsProductDialogOpen(false)}>إلغاء</Button>
+                      <Button variant="gold" onClick={handleSaveProduct}>حفظ التغييرات</Button>
                     </div>
                   </DialogContent>
                 </Dialog>
               </div>
 
+              {/* Product List Table (existing code...) */}
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>الصورة</TableHead>
-                      <TableHead>الاسم</TableHead>
-                      <TableHead>التصنيف</TableHead>
-                      <TableHead>السعر</TableHead>
-                      <TableHead>المخزون</TableHead>
-                      <TableHead>الحالة</TableHead>
-                      <TableHead>الإجراءات</TableHead>
+                      <TableHead className="text-right">المنتج</TableHead>
+                      <TableHead className="text-right">السعر</TableHead>
+                      <TableHead className="text-right">المخزون</TableHead>
+                      <TableHead className="text-right">التصنيف</TableHead>
+                      <TableHead className="text-right">إجراءات</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredProducts.map((product) => (
                       <TableRow key={product.id}>
-                        <TableCell>
-                          <img
-                            src={product.images?.[0] || product.image}
-                            alt={product.name}
-                            className="w-12 h-12 object-cover rounded"
-                          />
-                        </TableCell>
-                        <TableCell className="font-medium">{product.name}</TableCell>
-                        <TableCell>{product.category}</TableCell>
-                        <TableCell>
-                          <span className="font-bold text-primary">{product.price} د.ج</span>
-                          {product.original_price && (
-                            <span className="text-xs text-muted-foreground line-through mr-2">
-                              {product.original_price} د.ج
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <span className={cn(
-                              "font-bold",
-                              product.stock_quantity === 0 && "text-destructive",
-                              product.stock_quantity > 0 && product.stock_quantity < 10 && "text-destructive",
-                              product.stock_quantity >= 10 && "text-green-600"
-                            )}>
-                              {product.stock_quantity || 0}
-                            </span>
-                            {product.stock_quantity === 0 && (
-                              <Badge variant="destructive" className="text-[10px]">نفذ</Badge>
-                            )}
-                            {product.stock_quantity > 0 && product.stock_quantity < 10 && (
-                              <Badge variant="outline" className="text-[10px] text-destructive border-destructive">قليل</Badge>
-                            )}
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={product.image || (product.images && product.images[0]) || '/placeholder.svg'}
+                              alt={product.name}
+                              className="w-10 h-10 rounded object-cover border border-border"
+                            />
+                            <span>{product.name}</span>
                           </div>
                         </TableCell>
+                        <TableCell>{product.price} د.ج</TableCell>
                         <TableCell>
                           <Badge variant={product.in_stock ? 'default' : 'secondary'}>
-                            {product.in_stock ? 'متوفر' : 'غير متوفر'}
+                            {product.in_stock ? `متوفر (${product.stock_quantity})` : 'نفذت الكمية'}
                           </Badge>
                         </TableCell>
+                        <TableCell>{product.category}</TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => openProductDialog(product)}
-                            >
+                            <Button variant="ghost" size="icon" onClick={() => openProductDialog(product)}>
                               <Pencil className="h-4 w-4" />
                             </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => {
-                                const url = `${window.location.origin}/product/${product.id}`;
-                                navigator.clipboard.writeText(url);
-                                toast.success('تم نسخ رابط المنتج بنجاح');
-                              }}
-                            >
-                              <LinkIcon className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDeleteProduct(product.id)}
-                              className="text-destructive hover:text-destructive"
-                            >
+                            <Button variant="ghost" size="icon" className="text-destructive" onClick={() => handleDeleteProduct(product.id)}>
                               <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
@@ -929,6 +874,41 @@ const Admin = () => {
           <TabsContent value="store-settings">
             <StoreOrganization />
           </TabsContent>
+
+          <TabsContent value="messages">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 h-[70vh]">
+              {/* Chat List */}
+              <div className={`md:col-span-1 bg-card rounded-xl shadow-card border border-border flex flex-col ${selectedChat ? 'hidden md:flex' : 'flex'}`}>
+                <div className="p-4 border-b border-border">
+                  <h2 className="font-bold text-lg">الرسائل</h2>
+                </div>
+                <ChatList
+                  activeConversationId={selectedChat?.id}
+                  onSelectConversation={(id, user) => setSelectedChat({ id, user })}
+                />
+              </div>
+
+              {/* Chat Window */}
+              <div className={`md:col-span-2 bg-muted/30 rounded-xl border border-border/50 flex flex-col justify-center items-center ${!selectedChat ? 'hidden md:flex' : 'flex'}`}>
+                {selectedChat ? (
+                  <div className="w-full h-full">
+                    <ChatWindow
+                      conversationId={selectedChat.id}
+                      otherUser={selectedChat.user}
+                      onBack={() => setSelectedChat(null)}
+                    />
+                  </div>
+                ) : (
+                  <div className="text-center text-muted-foreground p-10">
+                    <MessageSquare className="h-16 w-16 mx-auto mb-4 opacity-20" />
+                    <p>اختر محادثة للبدء</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </TabsContent>
+
+
         </Tabs>
       </main>
     </div >
